@@ -11,7 +11,7 @@ namespace GasWeb.Domain.Users
     public interface IUserService
     {
         Task<User> Add(RegisterModel registerModel);
-        Task<User> TryLogIn(LogInModel logInModel);
+        Task<User> TryLogIn(LoginModel logInModel);
         Task<User> Get(long id);
         Task Update(long id, UserUpdateModel updateModel);
         Task<IReadOnlyCollection<User>> GetList();
@@ -39,7 +39,7 @@ namespace GasWeb.Domain.Users
             return user.ToContract();
         }
 
-        public async Task<User> TryLogIn(LogInModel logInModel)
+        public async Task<User> TryLogIn(LoginModel logInModel)
         {
             var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Name == logInModel.Username);
 

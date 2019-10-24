@@ -1,36 +1,33 @@
-﻿@page "/register"
+﻿@page "/login"
 @inject IAuthService AuthService
 @inject NavigationManager NavigationManager
 @using GasWeb.Shared.Authentication;
 
-<h1>Register</h1>
+<h1>Login</h1>
 
 @if (ShowErrors)
 {
     <div class="alert alert-danger" role="alert">
-        @foreach (var error in Errors)
-        {
-            <p>error</p>
-        }
+        <p>@Error</p>
     </div>
 }
 
 <div class="card">
     <div class="card-body">
         <h5 class="card-title">Please enter your details</h5>
-        <EditForm Model="RegisterModel" OnValidSubmit="HandleRegistration">
+        <EditForm Model="@loginModel" OnValidSubmit="@HandleLogin">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
             <div class="form-group">
                 <label for="username">Username</label>
-                <InputText Id="username" Class="form-control" @bind-Value="@RegisterModel.Username" />
-                <ValidationMessage For="@(() => RegisterModel.Username)" />
+                <InputText Id="username" Class="form-control" @bind-Value="@loginModel.Username" />
+                <ValidationMessage For="@(() => loginModel.Username)" />
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <InputText Id="password" Class="form-control" @bind-Value="RegisterModel.Password" />
-                <ValidationMessage For="@(() => RegisterModel.Password)" />
+                <InputText Id="password" type="password" Class="form-control" @bind-Value="@loginModel.Password" />
+                <ValidationMessage For="@(() => loginModel.Password)" />
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </EditForm>
@@ -39,24 +36,25 @@
 
 @code {
 
-    private RegisterModel RegisterModel = new RegisterModel();
+    private LoginModel loginModel = new LoginModel();
     private bool ShowErrors;
-    private IEnumerable<string> Errors;
+    private string Error = "";
 
-    private async Task HandleRegistration()
+    private async Task HandleLogin()
     {
         ShowErrors = false;
 
-        var result = await AuthService.Register(RegisterModel);
+        var result = await AuthService.Login(loginModel);
 
         if (result.Successful)
         {
-            NavigationManager.NavigateTo("/login");
+            NavigationManager.NavigateTo("/");
         }
         else
         {
-            Errors = new[] { result.Error };
+            Error = result.Error;
             ShowErrors = true;
         }
     }
+
 }

@@ -21,18 +21,18 @@ namespace GasWeb.Server.Authentication
 
         [HttpPost("login")]
         //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> LogIn([FromBody] LogInModel logInModel)
+        public async Task<IActionResult> LogIn([FromBody] LoginModel logInModel)
         {
             var user = await userService.TryLogIn(logInModel);
 
             if (user != null)
             {
                 await SignIn(user);
-                return NoContent();
+                return Ok(new LoginResult { Successful = true, User = user });
             }
             else
             {
-                return Unauthorized();
+                return BadRequest(new LoginResult { Successful = false, Error = "Invalid credentials" });
             }
         }
 
@@ -42,7 +42,7 @@ namespace GasWeb.Server.Authentication
         {
             var user = await userService.Add(registerModel);
             await SignIn(user);
-            return NoContent();
+            return Ok(new RegisterResult { Successful = true });
         }
 
         [HttpPost("logout")]

@@ -39,10 +39,7 @@ namespace GasWeb.Server
                 options.Filters.Add(new ValidateModelAttribute());
                 options.Filters.Add(new ValidationExceptionTranslatorAttribute());
             })
-            .AddNewtonsoftJson(options =>
-            {
-                options.SerializerSettings.Converters.Add(new StringEnumConverter());
-            });
+            .AddNewtonsoftJson();
 
             services.AddResponseCompression(opts =>
             {
@@ -78,11 +75,6 @@ namespace GasWeb.Server
                 {
                     options.LoginPath = "/auth/login";
                     options.AccessDeniedPath = "/auth/accessdenied";
-                })
-                .AddFacebook(options =>
-                {
-                    options.AppId = "";
-                    options.AppSecret = "";
                 });
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
