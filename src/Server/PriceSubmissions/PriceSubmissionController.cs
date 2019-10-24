@@ -2,12 +2,13 @@
 using GasWeb.Domain.PriceSubmissions.Queries;
 using GasWeb.Shared;
 using GasWeb.Shared.GasStations;
+using GasWeb.Shared.PriceSubmissions;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace GasWeb.Server.PriceSubmissions
 {
-    [Route("price-submissions")]
+    [Route("api/price-submissions")]
     public class PriceSubmissionController : ControllerBase
     {
         private readonly IPriceSubmissionsService priceSubmissionsService;

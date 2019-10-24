@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GasWeb.Shared.GasStations
+namespace GasWeb.Shared.PriceSubmissions
 {
     public class SubmitPriceModel
     {

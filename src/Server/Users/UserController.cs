@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GasWeb.Server.Users
 {
-    [Route("users")]
+    [Route("api/users")]
     [RequireModeratorRole]
     public class UserController : ControllerBase
     {

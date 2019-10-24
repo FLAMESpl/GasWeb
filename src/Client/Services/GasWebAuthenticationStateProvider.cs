@@ -35,7 +35,9 @@ namespace GasWeb.Client.Services
             else
             {
                 logger.LogInformation($"Got authentication state for logged user: { userContext.Id }");
-                return GetAuthenticatedUser(userContext);
+                var user =  GetAuthenticatedUser(userContext);
+                logger.LogInformation($"Authenticated: { user.User.Identity.IsAuthenticated }");
+                return user;
             }
         }
 
@@ -51,16 +53,20 @@ namespace GasWeb.Client.Services
             NotifyAuthenticationStateChanged(authState);
         }
 
-        private AuthenticationState GetAnonymousUser() => GetAuthenticationStateForClaims();
+        private AuthenticationState GetAnonymousUser() => GetAuthenticationStateForIdentity(new ClaimsIdentity());
 
         private AuthenticationState GetAuthenticatedUser(UserContext user) =>
-            GetAuthenticationStateForClaims(
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Role, user.Role.ToString()));
+            GetAuthenticationStateForIdentity(new ClaimsIdentity(
+                new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.Name),
+                    new Claim(ClaimTypes.Role, user.Role.ToString())
+                },
+                "Cookies"));
 
-        private AuthenticationState GetAuthenticationStateForClaims(params Claim[] claims) =>
-            new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(claims)));
+        private AuthenticationState GetAuthenticationStateForIdentity(ClaimsIdentity identity) =>
+            new AuthenticationState(new ClaimsPrincipal(identity));
 
     }
 }

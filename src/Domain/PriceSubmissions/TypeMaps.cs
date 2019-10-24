@@ -1,4 +1,5 @@
 ﻿using GasWeb.Shared.GasStations;
+using GasWeb.Shared.PriceSubmissions;
 
 namespace GasWeb.Domain.PriceSubmissions
 {

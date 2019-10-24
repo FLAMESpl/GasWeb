@@ -1,0 +1,71 @@
+﻿@page "/gas-stations"
+@using GasWeb.Shared
+@using GasWeb.Shared.GasStations
+@using GasWeb.Shared.Users
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h1>Stacje benzynowe</h1>
+
+@if (gasStations == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="hoverTable table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Lokacja</th>
+                <th>Utworzono przez</th>
+                <th>Ostatnia modyfikacja</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var gasStation in gasStations)
+            {
+                <tr @onclick="() => NaviagateToGasStation(gasStation.Id)" style="cursor:pointer">
+                    <td>@gasStation.Id</td>
+                    <td>@FormatLocation(gasStation.Location)</td>
+                    <td>@userNames[gasStation.CreatedByUserId]</td>
+                    <td>@gasStation.LastModifiedAt</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<style style="text/css">
+    .hoverTable {
+        width: 100%;
+        border-collapse: collapse;
+    }
+        /* Define the hover highlight color for the table row */
+        .hoverTable tbody tr:hover {
+            background-color: #ffff99;
+        }
+</style>
+
+@code {
+    IReadOnlyCollection<GasStation> gasStations;
+    Dictionary<long, string> userNames;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var users = await Http.GetJsonAsync<User[]>("api/users");
+        var gasStationsResponse = await Http.GetJsonAsync<PageResponse<GasStation>>("api/gas-stations");
+        gasStations = gasStationsResponse.Results;
+        userNames = users.ToDictionary(x => x.Id, x => x.Name);
+    }
+
+    private string FormatLocation(Location location)
+    {
+        return $"{ SexagesimalAngle.FromDouble(location.Longitude) } { SexagesimalAngle.FromDouble(location.Latitude) }";
+    }
+
+    private void NaviagateToGasStation(long gasStationId)
+    {
+        NavigationManager.NavigateTo($"/gas-stations/{gasStationId}");
+    }
+}

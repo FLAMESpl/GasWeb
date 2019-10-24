@@ -1,7 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using GasWeb.Shared.Authentication;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Text;
@@ -35,7 +34,7 @@ namespace GasWeb.Client.Services
         public async Task<LoginResult> Login(LoginModel model)
         {
             var content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
-            var response = await httpClient.PostAsync("auth/login", content);
+            var response = await httpClient.PostAsync("api/auth/login", content);
             var stringResult = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<LoginResult>(stringResult);
             if (result.Successful)
@@ -49,14 +48,14 @@ namespace GasWeb.Client.Services
 
         public async Task Logout()
         {
-            await httpClient.PostJsonAsync("auth/logout", null);
+            await httpClient.PostJsonAsync("api/auth/logout", null);
             await localStorage.RemoveItemAsync<UserContext>();
             authenticationStateProvider.MarkUserAsLoggedOut();
         }
 
         public Task<RegisterResult> Register(RegisterModel model)
         {
-            return httpClient.PostJsonAsync<RegisterResult>("auth/register", model);
+            return httpClient.PostJsonAsync<RegisterResult>("api/auth/register", model);
         }
     }
 }

@@ -1,0 +1,71 @@
+﻿@page "/gas-stations/{GasStationId:long}"
+@using GasWeb.Shared
+@using GasWeb.Shared.GasStations
+@using GasWeb.Shared.PriceSubmissions
+@using GasWeb.Shared.Users
+@inject HttpClient Http
+
+@if (initialized)
+{
+    <h1>@FormatLocation(gasStation.Location)</h1>
+
+    <p>Utworzono przez @userNames[gasStation.CreatedByUserId]</p>
+    <p>Ostation modyfikowano @priceSubmissions.Select(x => x.SubmissionDate.Date).Append(gasStation.LastModifiedAt.Date).Max().ToShortDateString()</p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Typ paliwa</th>
+                <th>Cena</th>
+                <th>Utworzono przez</th>
+                <th>Data dodania</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var priceSubmission in priceSubmissions)
+            {
+                <tr>
+                    <td>@priceSubmission.Id</td>
+                    <td>@priceSubmission.FuelType</td>
+                    <td>@priceSubmission.Amount</td>
+                    <td>@userNames[priceSubmission.CreatedByUserId]</td>
+                    <td>@priceSubmission.SubmissionDate.ToShortDateString()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p><em>Loading...</em></p>
+}
+
+@code {
+    [Parameter] public long GasStationId { get; set; }
+
+    GasStation gasStation;
+    IReadOnlyCollection<PriceSubmission> priceSubmissions;
+    Dictionary<long, string> userNames;
+    bool initialized = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var gasStationTask = Http.GetJsonAsync<GasStation>($"api/gas-stations/{GasStationId}");
+        var priceSubmissionsTask = Http.GetJsonAsync<PageResponse<PriceSubmission>>($"api/price-submissions?gasStationId={GasStationId}");
+        var usersTask = Http.GetJsonAsync<User[]>("api/users");
+
+        await Task.WhenAll(gasStationTask, priceSubmissionsTask, usersTask);
+
+        gasStation = gasStationTask.Result;
+        priceSubmissions = priceSubmissionsTask.Result.Results;
+        userNames = usersTask.Result.ToDictionary(x => x.Id, x => x.Name);
+
+        initialized = true;
+    }
+
+    private string FormatLocation(Location location)
+    {
+        return $"{ SexagesimalAngle.FromDouble(location.Longitude) } { SexagesimalAngle.FromDouble(location.Latitude) }";
+    }
+}

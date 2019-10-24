@@ -1,6 +1,7 @@
 ﻿using GasWeb.Domain.PriceSubmissions.Queries;
 using GasWeb.Shared;
 using GasWeb.Shared.GasStations;
+using GasWeb.Shared.PriceSubmissions;
 using System;
 using System.Linq;
 using System.Threading.Tasks;

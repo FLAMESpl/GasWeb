@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace GasWeb.Server.Authentication
 {
-    [Route("auth")]
+    [Route("api/auth")]
     public class AuthenticationController : ControllerBase
     {
         private readonly IUserService userService;

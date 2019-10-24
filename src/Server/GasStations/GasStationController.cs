@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GasWeb.Server.GasStations
 {
-    [Route("gas-stations")]
+    [Route("api/gas-stations")]
     public class GasStationController : ControllerBase
     {
         private readonly IGasStationService gasStationService;
