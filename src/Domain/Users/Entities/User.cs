@@ -18,6 +18,15 @@ namespace GasWeb.Domain.Users.Entities
             Active = active;
         }
 
+        public User(long id, string name, string password, UserRole role, bool active)
+        {
+            Id = id;
+            Name = name;
+            Password = password;
+            Role = role;
+            Active = active;
+        }
+
         public void Update(UserUpdateModel updateModel)
         {
             Name = updateModel.Username ?? Name;

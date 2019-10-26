@@ -1,7 +1,5 @@
 ﻿using GasWeb.Domain.PriceSubmissions;
-using GasWeb.Domain.PriceSubmissions.Queries;
 using GasWeb.Shared;
-using GasWeb.Shared.GasStations;
 using GasWeb.Shared.PriceSubmissions;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -19,7 +17,7 @@ namespace GasWeb.Server.PriceSubmissions
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(SubmitPriceModel model)
+        public async Task<IActionResult> Create([FromBody] SubmitPriceModel model)
         {
             var id = await priceSubmissionsService.SubmitPrice(model);
             return CreatedAtAction(nameof(Get), new { id });
@@ -39,10 +37,11 @@ namespace GasWeb.Server.PriceSubmissions
         }
 
         [HttpGet]
-        public Task<PageResponse<PriceSubmission>> GetList(long? gasStationId, FuelType? fuelType, long? createdByUserId,
+        public Task<PageResponse<PriceSubmission>> GetList(long? gasStationId, FuelType? fuelTypes, long? createdByUserId,
             int pageNumber = RequestDefaults.PageNumber, int pageSize = RequestDefaults.PageSize)
         {
-            var query = new GetPriceSubmissions(gasStationId, fuelType, createdByUserId, pageNumber, pageSize);
+            var types = fuelTypes ?? FuelType.Diesel | FuelType.Gas | FuelType.Petrol;
+            var query = new GetPriceSubmissions(gasStationId, types, createdByUserId, pageNumber, pageSize);
             return priceSubmissionsService.GetList(query);
         }
     }

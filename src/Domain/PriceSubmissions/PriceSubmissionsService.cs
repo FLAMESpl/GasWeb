@@ -1,6 +1,4 @@
-﻿using GasWeb.Domain.PriceSubmissions.Queries;
-using GasWeb.Shared;
-using GasWeb.Shared.GasStations;
+﻿using GasWeb.Shared;
 using GasWeb.Shared.PriceSubmissions;
 using System;
 using System.Linq;
@@ -19,9 +17,9 @@ namespace GasWeb.Domain.PriceSubmissions
     internal class PriceSubmissionsService : IPriceSubmissionsService
     {
         private readonly GasWebDbContext dbContext;
-        private readonly AuditMetadataProvider auditMetadataProvider;
+        private readonly UserContextAuditMetadataProvider auditMetadataProvider;
 
-        public PriceSubmissionsService(GasWebDbContext dbContext, AuditMetadataProvider auditMetadataProvider)
+        public PriceSubmissionsService(GasWebDbContext dbContext, UserContextAuditMetadataProvider auditMetadataProvider)
         {
             this.dbContext = dbContext;
             this.auditMetadataProvider = auditMetadataProvider;
@@ -44,8 +42,8 @@ namespace GasWeb.Domain.PriceSubmissions
         {
             var dbQuery = dbContext.PriceSubmissions.AsQueryable();
 
-            if (query.FuelType.HasValue)
-                dbQuery = dbQuery.Where(x => x.FuelType == query.FuelType.Value);
+            if (query.FuelTypes != (FuelType.Diesel | FuelType.Gas | FuelType.Petrol))
+                dbQuery = dbQuery.Where(x => query.FuelTypes.HasFlag(x.FuelType));
 
             if (query.CreatedByUserId.HasValue)
                 dbQuery = dbQuery.Where(x => x.CreatedByUserId == query.CreatedByUserId.Value);
@@ -53,7 +51,9 @@ namespace GasWeb.Domain.PriceSubmissions
             if (query.GasStationId.HasValue)
                 dbQuery = dbQuery.Where(x => x.GasStationId == query.GasStationId.Value);
 
-            return dbQuery.PickPageAsync(query.PageNumber, query.PageSize, x => x.ToContract());
+            return dbQuery
+                .OrderByDescending(x => x.LastModified)
+                .PickPageAsync(query.PageNumber, query.PageSize, x => x.ToContract());
         }
 
         public async Task<long> SubmitPrice(SubmitPriceModel model)

@@ -1,0 +1,106 @@
+﻿@page "/franchises"
+@using GasWeb.Shared
+@using GasWeb.Shared.Franchises
+@using GasWeb.Shared.Users
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h1>Franczyzny</h1>
+
+@if (franchises == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            @if (expandEditForm)
+            {
+                <EditForm Model="@addFranchiseModel" OnValidSubmit="@HandleAddFranchise">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    
+                    <div class="form-group form-horizontal">
+                        <label for="name">Nazwa</label>
+                        <InputText Id="name" Class="form-control" @bind-Value="@addFranchiseModel.Name" />
+                        <ValidationMessage For="@(() => addFranchiseModel.Name)" />
+                    </div>
+
+                    <div class="form-group form-horizontal">
+                        <button type="submit" class="btn btn-primary">Zapisz</button>
+                        <button class="btn btn-outline-secondary" @onclick="() => expandEditForm = false">Anuluj</button>
+                    </div>
+
+                </EditForm>
+            }
+            else
+            {
+                <button type="submit" class="btn btn-primary" @onclick="() => expandEditForm = true">Dodaj</button>
+            }
+            </div>
+    </div>
+
+    <table class="hoverTable table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nazwa</th>
+                <th>Utworzono przez</th>
+                <th>Ostatnia modyfikacja</th>
+                <th>Hurt. cena benzyny</th>
+                <th>Hurt. cena diesela</th>
+                <th>Hurt. cena gazu</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var franchise in franchises)
+            {
+                <tr>
+                    <td>@franchise.Id</td>
+                    <td>@franchise.Name</td>
+                    <td>@userNames[franchise.CreatedByUserId]</td>
+                    <td>@franchise.ModifiedAt</td>
+                    <td>@franchise.FindPrice(FuelType.Petrol)</td>
+                    <td>@franchise.FindPrice(FuelType.Diesel)</td>
+                    <td>@franchise.FindPrice(FuelType.Gas)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<style>
+    .hoverTable {
+        width: 100%;
+        border-collapse: collapse;
+    }
+        /* Define the hover highlight color for the table row */
+        .hoverTable tbody tr:hover {
+            background-color: #00e673;
+        }
+</style>
+
+@code {
+    IReadOnlyCollection<Franchise> franchises;
+    Dictionary<long, string> userNames;
+    bool expandEditForm = false;
+    AddFranchiseModel addFranchiseModel = new AddFranchiseModel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var users = await Http.GetJsonAsync<User[]>("api/users");
+        var gasStationsResponse = await Http.GetJsonAsync<PageResponse<Franchise>>("api/franchises");
+        franchises = gasStationsResponse.Results;
+        userNames = users.ToDictionary(x => x.Id, x => x.Name);
+    }
+
+    private async Task HandleAddFranchise()
+    {
+        franchises = null;
+        expandEditForm = false;
+        await Http.PostJsonAsync("api/franchises", addFranchiseModel);
+        addFranchiseModel = new AddFranchiseModel();
+        await OnInitializedAsync();
+    }
+}

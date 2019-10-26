@@ -3,15 +3,17 @@ using System;
 using GasWeb.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace GasWeb.Domain.Migrations
 {
     [DbContext(typeof(GasWebDbContext))]
-    partial class GasWebDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191025223440_Init")]
+    partial class Init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,25 +43,7 @@ namespace GasWeb.Domain.Migrations
 
                     b.HasIndex("ModifiedByUserId");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.ToTable("Franchises");
-                });
-
-            modelBuilder.Entity("GasWeb.Domain.Franchises.Entities.FranchiseWholesalePrice", b =>
-                {
-                    b.Property<long>("FranchiseId");
-
-                    b.Property<int>("FuelType");
-
-                    b.Property<decimal>("Amount");
-
-                    b.Property<DateTime>("ModifiedAt");
-
-                    b.HasKey("FranchiseId", "FuelType");
-
-                    b.ToTable("FranchiseWholesalePrice");
                 });
 
             modelBuilder.Entity("GasWeb.Domain.GasStations.Entities.GasStation", b =>
@@ -157,14 +141,6 @@ namespace GasWeb.Domain.Migrations
                     b.HasOne("GasWeb.Domain.Users.Entities.User")
                         .WithMany()
                         .HasForeignKey("ModifiedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("GasWeb.Domain.Franchises.Entities.FranchiseWholesalePrice", b =>
-                {
-                    b.HasOne("GasWeb.Domain.Franchises.Entities.Franchise")
-                        .WithMany("WholesalePrices")
-                        .HasForeignKey("FranchiseId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

@@ -6,8 +6,9 @@ namespace GasWeb.Shared.Users
 {
     public enum UserRole
     {
-        Admin,
+        User,
         Moderator,
-        User
+        Admin,
+        System
     }
 }

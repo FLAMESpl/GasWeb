@@ -1,6 +1,5 @@
 ﻿using GasWeb.Shared;
 using GasWeb.Shared.GasStations;
-using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 
 namespace GasWeb.Domain.GasStations
@@ -17,9 +16,9 @@ namespace GasWeb.Domain.GasStations
     internal class GasStationService : IGasStationService
     {
         private readonly GasWebDbContext dbContext;
-        private readonly AuditMetadataProvider auditMetadataProvider;
+        private readonly UserContextAuditMetadataProvider auditMetadataProvider;
 
-        public GasStationService(GasWebDbContext dbContext, AuditMetadataProvider auditMetadataProvider)
+        public GasStationService(GasWebDbContext dbContext, UserContextAuditMetadataProvider auditMetadataProvider)
         {
             this.dbContext = dbContext;
             this.auditMetadataProvider = auditMetadataProvider;
@@ -28,8 +27,11 @@ namespace GasWeb.Domain.GasStations
         public async Task<long> Create(AddGasStationModel model)
         {
             var gasStation = new Entities.GasStation(
+                name: model.Name,
                 latitude: model.Location.Latitude, 
-                longitude: model.Location.Longitude);
+                longitude: model.Location.Longitude,
+                franchiseId: model.FranchiseId,
+                maintainedBySystem: false);
 
             auditMetadataProvider.AddAuditMetadataToNewEntity(gasStation);
             dbContext.GasStations.Add(gasStation);
@@ -55,9 +57,11 @@ namespace GasWeb.Domain.GasStations
             return dbContext.GasStations.PickPageAsync(pageNumber, pageSize, x => x.ToContract());
         }
 
-        public Task Update(long id, UpdateGasStationModel model)
+        public async Task Update(long id, UpdateGasStationModel model)
         {
-            throw new System.NotImplementedException();
+            var gasStation = await dbContext.GasStations.GetAsync(id);
+            gasStation.Update(model);
+            await dbContext.SaveChangesAsync();
         }
     }
 }

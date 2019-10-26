@@ -1,5 +1,4 @@
-﻿using GasWeb.Shared.GasStations;
-using GasWeb.Shared.PriceSubmissions;
+﻿using GasWeb.Shared.PriceSubmissions;
 
 namespace GasWeb.Domain.PriceSubmissions
 {
@@ -9,7 +8,7 @@ namespace GasWeb.Domain.PriceSubmissions
             => new PriceSubmission(
                 id: domain.Id,
                 createdByUserId: domain.CreatedByUserId,
-                submissionDate: domain.SubmissionDate,
+                modifiedAt: domain.LastModified,
                 gasStationId: domain.GasStationId,
                 amount: domain.Amount,
                 fuelType: domain.FuelType);

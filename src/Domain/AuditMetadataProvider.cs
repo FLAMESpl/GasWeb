@@ -4,11 +4,17 @@ using System.Security.Claims;
 
 namespace GasWeb.Domain
 {
-    internal class AuditMetadataProvider
+    internal interface IAuditMetadataProvider
+    {
+        void AddAuditMetadataToNewEntity(AuditEntity entity);
+        void UpdateAuditMetadataInExistingEntiy(AuditEntity entity);
+    }
+
+    internal class UserContextAuditMetadataProvider : IAuditMetadataProvider
     {
         private readonly IHttpContextAccessor httpContextAccessor;
 
-        public AuditMetadataProvider(IHttpContextAccessor httpContextAccessor)
+        public UserContextAuditMetadataProvider(IHttpContextAccessor httpContextAccessor)
         {
             this.httpContextAccessor = httpContextAccessor;
         }

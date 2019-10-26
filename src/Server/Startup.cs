@@ -32,6 +32,8 @@ namespace GasWeb.Server
             var bootstrap = new GasWebBootstrap();
             bootstrap.Configure(services);
 
+            services.AddHostedService<InitializationHostedService>();
+
             services.AddMvc(options =>
             {
                 options.EnableEndpointRouting = false;

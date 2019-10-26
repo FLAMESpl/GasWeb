@@ -1,6 +1,8 @@
 ﻿using GasWeb.Domain.Exceptions;
+using GasWeb.Domain.Users.Entities;
 using GasWeb.Shared;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
@@ -15,6 +17,11 @@ namespace GasWeb.Domain
         public static async Task<T> GetAsync<T>(this DbSet<T> dbSet, params object[] keyValues) where T : class
         {
             return await dbSet.FindAsync(keyValues) ?? throw new EntityNotFound();
+        }
+
+        public static async Task<T> GetAsync<T>(this IQueryable<T> queryable, Expression<Func<T, bool>> selector) where T : class
+        {
+            return await queryable.FirstOrDefaultAsync(selector) ?? throw new EntityNotFound();
         }
 
         public static async Task<PageResponse<TResult>> PickPageAsync<T, TResult>(
@@ -41,6 +48,21 @@ namespace GasWeb.Domain
                 totalCount: totalCountTask.Result);
 
             return new PageResponse<TResult>(resultsTask.Result, pagingInfo);
+        }
+
+        public static ModelBuilder AuditEntity<T>(this ModelBuilder modelBuilder, Action<EntityTypeBuilder<T>> configuration)
+            where T : AuditEntity
+        {
+            if (configuration is null) throw new ArgumentNullException(nameof(configuration));
+
+            modelBuilder.Entity<T>(b =>
+            {
+                b.HasOne<User>().WithMany().HasForeignKey(x => x.CreatedByUserId);
+                b.HasOne<User>().WithMany().HasForeignKey(x => x.ModifiedByUserId);
+                configuration(b);
+            });
+
+            return modelBuilder;
         }
     }
 }

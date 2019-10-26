@@ -9,5 +9,10 @@ namespace GasWeb.Shared
 
         [Required]
         public double Longitude { get; set; }
+
+        public override string ToString()
+        {
+            return $"{ SexagesimalAngle.FromDouble(Longitude) } { SexagesimalAngle.FromDouble(Latitude) }";
+        }
     }
 }

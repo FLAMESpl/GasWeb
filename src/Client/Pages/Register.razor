@@ -39,7 +39,7 @@
 
 @code {
 
-    private RegisterModel RegisterModel = new RegisterModel();
+    private RegisterModel RegisterModel = new RegisterModel { Role = GasWeb.Shared.Users.UserRole.Admin };
     private bool ShowErrors;
     private IEnumerable<string> Errors;
 

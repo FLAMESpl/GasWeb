@@ -9,6 +9,7 @@ namespace GasWeb.Domain.GasStations
             => new GasStation
             {
                 Id = domain.Id,
+                Name = domain.Name,
                 Location = new Location
                 {
                     Longitude = domain.Longitude,
@@ -16,7 +17,9 @@ namespace GasWeb.Domain.GasStations
                 },
                 CreatedByUserId = domain.CreatedByUserId,
                 LastModifiedByUserId = domain.ModifiedByUserId,
-                LastModifiedAt = domain.LastModified
+                LastModifiedAt = domain.LastModified,
+                ManagedBySystem = domain.MaintainedBySystem,
+                FranchiseId = domain.FranchiseId
             };
     }
 }

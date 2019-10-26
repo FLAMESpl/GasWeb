@@ -1,7 +1,9 @@
 ﻿@page "/gas-stations"
 @using GasWeb.Shared
 @using GasWeb.Shared.GasStations
+@using GasWeb.Shared.Franchises
 @using GasWeb.Shared.Users
+@using GasWeb.Client.Pages.ViewModels
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
 
@@ -13,10 +15,64 @@
 }
 else
 {
+    <div class="card">
+        <div class="card-body">
+            @if (expandEditForm)
+            {
+            <EditForm Model="@addGasStationViewModel" OnValidSubmit="@HandleAddGasStation">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="form-group form-horizontal">
+                    <label for="name">Nazwa</label>
+                    <InputText Id="name" Class="form-control" @bind-Value="@addGasStationViewModel.Name" />
+                    <ValidationMessage For="@(() => addGasStationViewModel.Name)" />
+                </div>
+
+                <div class="form-group form-horizontal">
+                    <label for="franchise">Franczyzna</label>
+                    <InputSelect Id="franchise" Class="form-control" @bind-Value="@addGasStationViewModel.Franchise">
+                        <option></option>
+                        @foreach (var name in franchiseNames.Values)
+                        {
+                            <option>@name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => addGasStationViewModel.Franchise)" />
+                </div>
+
+                <div class="form-group form-horizontal">
+                    <label for="longitude">Długość geograficzna</label>
+                    <InputNumber Id="longitude" Class="form-control" @bind-Value="@addGasStationViewModel.Location.Longitude" />
+                    <ValidationMessage For="@(() => addGasStationViewModel.Location.Longitude)" />
+                </div>
+
+                <div class="form-group form-horizontal">
+                    <label for="latitude">Szerokość geograficzna</label>
+                    <InputNumber Id="latitude" Class="form-control" @bind-Value="@addGasStationViewModel.Location.Latitude" />
+                    <ValidationMessage For="@(() => addGasStationViewModel.Location.Latitude)" />
+                </div>
+
+                <div class="form-group form-horizontal">
+                    <button type="submit" class="btn btn-primary">Zapisz</button>
+                    <button class="btn btn-outline-secondary" @onclick="() => expandEditForm = false">Anuluj</button>
+                </div>
+
+            </EditForm>
+            }
+            else
+            {
+                <button type="submit" class="btn btn-primary" @onclick="() => expandEditForm = true">Dodaj</button>
+            }
+        </div>
+    </div>
+
     <table class="hoverTable table">
         <thead>
             <tr>
                 <th>Id</th>
+                <th>Nazwa</th>
+                <th>Franczyzna</th>
                 <th>Lokacja</th>
                 <th>Utworzono przez</th>
                 <th>Ostatnia modyfikacja</th>
@@ -27,7 +83,9 @@ else
             {
                 <tr @onclick="() => NaviagateToGasStation(gasStation.Id)" style="cursor:pointer">
                     <td>@gasStation.Id</td>
-                    <td>@FormatLocation(gasStation.Location)</td>
+                    <td>@gasStation.Name</td>
+                    <td>@(gasStation.FranchiseId.HasValue ? franchiseNames[gasStation.FranchiseId.Value] : "")</td>
+                    <td>@gasStation.Location</td>
                     <td>@userNames[gasStation.CreatedByUserId]</td>
                     <td>@gasStation.LastModifiedAt</td>
                 </tr>
@@ -36,36 +94,48 @@ else
     </table>
 }
 
-<style style="text/css">
+<style>
     .hoverTable {
         width: 100%;
         border-collapse: collapse;
     }
         /* Define the hover highlight color for the table row */
         .hoverTable tbody tr:hover {
-            background-color: #ffff99;
+            background-color: #00e673;
         }
 </style>
 
 @code {
     IReadOnlyCollection<GasStation> gasStations;
     Dictionary<long, string> userNames;
+    Dictionary<long, string> franchiseNames;
+    bool expandEditForm = false;
+    AddGasStationViewModel addGasStationViewModel = new AddGasStationViewModel { Location = new Location() };
 
     protected override async Task OnInitializedAsync()
     {
-        var users = await Http.GetJsonAsync<User[]>("api/users");
-        var gasStationsResponse = await Http.GetJsonAsync<PageResponse<GasStation>>("api/gas-stations");
-        gasStations = gasStationsResponse.Results;
-        userNames = users.ToDictionary(x => x.Id, x => x.Name);
-    }
+        var usersTask = Http.GetJsonAsync<User[]>("api/users");
+        var franchisesTask = Http.GetJsonAsync<PageResponse<Franchise>>("api/franchises");
+        var gasStationsTask = Http.GetJsonAsync<PageResponse<GasStation>>("api/gas-stations");
 
-    private string FormatLocation(Location location)
-    {
-        return $"{ SexagesimalAngle.FromDouble(location.Longitude) } { SexagesimalAngle.FromDouble(location.Latitude) }";
+        await Task.WhenAll(usersTask, franchisesTask, gasStationsTask);
+
+        gasStations = gasStationsTask.Result.Results;
+        userNames = usersTask.Result.ToDictionary(x => x.Id, x => x.Name);
+        franchiseNames = franchisesTask.Result.Results.ToDictionary(x => x.Id, x => x.Name);
     }
 
     private void NaviagateToGasStation(long gasStationId)
     {
         NavigationManager.NavigateTo($"/gas-stations/{gasStationId}");
+    }
+
+    private async Task HandleAddGasStation()
+    {
+        gasStations = null;
+        expandEditForm = false;
+        await Http.PostJsonAsync("api/gas-stations", addGasStationViewModel.ToModel(franchiseNames));
+        addGasStationViewModel = new AddGasStationViewModel { Location = new Location() };
+        await OnInitializedAsync();
     }
 }
