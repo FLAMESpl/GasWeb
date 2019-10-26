@@ -1,9 +1,12 @@
 ﻿using GasWeb.Domain.Exceptions;
+using GasWeb.Domain.Infrastructure;
 using GasWeb.Domain.Users.Entities;
 using GasWeb.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -46,7 +49,7 @@ namespace GasWeb.Domain
                 pageNumber: pageNumber,
                 pageSize: pageSize,
                 totalCount: totalCountTask.Result);
-
+            
             return new PageResponse<TResult>(resultsTask.Result, pagingInfo);
         }
 
@@ -64,5 +67,34 @@ namespace GasWeb.Domain
 
             return modelBuilder;
         }
+
+        [SuppressMessage("Security", "EF1000:Possible SQL injection vulnerability.")]
+        public static Task<int> UpsertAsync<T>(this DbContext dbContext, IEnumerable<T> entities, Action<SqlUpsertOptions<T>> upsertOptionsFactory)
+        {
+            var options = new SqlUpsertOptions<T>();
+            upsertOptionsFactory(options);
+
+            var tableName = typeof(T).Name;
+            var updateColumns = options.Columns.Except(options.OnConflictColumns);
+
+            var sql = $@"
+                INSERT INTO ""{ tableName }""
+                (
+                    { options.Columns.GetColumnsList() }
+                )
+                VALUES
+                    { string.Join(",", entities.Select(x => $"({ string.Join(",", options.ValuesSelector(x)) })")) }
+                ON CONFLICT
+                (
+                    { options.OnConflictColumns.GetColumnsList() }
+                )
+                DO UPDATE SET
+                    { string.Join(",", updateColumns.Select(c => $@"""{c}"" = EXCLUDED.""{c}""")) }";
+
+            return dbContext.Database.ExecuteSqlCommandAsync(sql);
+        }
+
+        private static string GetColumnsList(this IEnumerable<string> columnNames) => 
+            string.Join(",", columnNames.Select(x => $@"""{x}"""));
     }
 }

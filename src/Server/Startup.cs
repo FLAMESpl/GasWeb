@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System.Linq;
+using System.Net.Http;
 
 namespace GasWeb.Server
 {
@@ -31,6 +32,9 @@ namespace GasWeb.Server
             var postgreSqlSettings = Configuration.GetSection(nameof(PostgreSqlSettings)).Get<PostgreSqlSettings>();
             var bootstrap = new GasWebBootstrap();
             bootstrap.Configure(services);
+            services.AddScoped<HttpClientProvider>();
+            services.AddHttpClient<HttpClientProvider>();
+            services.AddScoped(sp => sp.GetRequiredService<HttpClientProvider>().Get());
 
             services.AddHostedService<InitializationHostedService>();
 

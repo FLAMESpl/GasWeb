@@ -1,9 +1,13 @@
 ﻿using GasWeb.Domain.Franchises;
+using GasWeb.Domain.Franchises.Lotos;
 using GasWeb.Domain.GasStations;
 using GasWeb.Domain.Initialization;
 using GasWeb.Domain.PriceSubmissions;
 using GasWeb.Domain.Users;
 using Microsoft.Extensions.DependencyInjection;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("GasWeb.Server.Tests")]
 
 namespace GasWeb.Domain
 {
@@ -18,6 +22,7 @@ namespace GasWeb.Domain
             services.AddScoped(sp => sp.GetRequiredService<SystemFranchiseCollectionFactory>().Create());
             services.AddScoped<UserContextAuditMetadataProvider>();
             services.RegisterInitializationComponents();
+            services.RegisterLotosComponents();
             return services;
         }
     }
