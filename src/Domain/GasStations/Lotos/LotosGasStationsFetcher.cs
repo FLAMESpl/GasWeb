@@ -1,6 +1,4 @@
-﻿using GasWeb.Domain.GasStations.Entities;
-using HtmlAgilityPack;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -20,13 +18,7 @@ namespace GasWeb.Domain.GasStations.Lotos
 
         public async Task<IReadOnlyList<string>> GetLotosGasStations()
         {
-            var response = await httpClient.GetAsync(LotosGasStationsWebPageUrl);
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(content);
-
+            var htmlDocument = await httpClient.GetHtmlDocument(LotosGasStationsWebPageUrl);
             var nodes = htmlDocument.GetElementbyId("stations-list").SelectNodes("tbody/tr/td[1]/h6/a");
             return nodes.Select(x => x.InnerText).ToList();
         }

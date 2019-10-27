@@ -14,5 +14,10 @@ namespace GasWeb.Client.Shared
                 default: return fuelType.ToString();
             }
         }
+
+        public static string ToDisplayAmount(this decimal price)
+        {
+            return price.ToString("0.00");
+        }
     }
 }

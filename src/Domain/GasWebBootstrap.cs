@@ -1,5 +1,7 @@
 ﻿using GasWeb.Domain.Franchises;
+using GasWeb.Domain.Franchises.Bp;
 using GasWeb.Domain.Franchises.Lotos;
+using GasWeb.Domain.Franchises.Orlen;
 using GasWeb.Domain.GasStations;
 using GasWeb.Domain.GasStations.Lotos;
 using GasWeb.Domain.Initialization;
@@ -25,6 +27,8 @@ namespace GasWeb.Domain
             services.RegisterInitializationComponents();
 
             AddLotosComponents(services);
+            AddOrlenComponents(services);
+            AddBpComponents(services);
 
             return services;
         }
@@ -37,6 +41,16 @@ namespace GasWeb.Domain
             services.AddScoped<LotosGasStationsFetcher>();
         }
 
+        private void AddOrlenComponents(IServiceCollection services)
+        {
+            services.AddScoped<IOrlenWholesalePriceUpdater, OrlenWholesalePriceUpdater>();
+            services.AddScoped<OrlenWholesalePriceFetcher>();
+        }
 
+        private void AddBpComponents(IServiceCollection services)
+        {
+            services.AddScoped<IBpWholesalePriceUpdater, BpWholesalePriceUpdater>();
+            services.AddScoped<BpWholesalePriceFetcher>();
+        }
     }
 }

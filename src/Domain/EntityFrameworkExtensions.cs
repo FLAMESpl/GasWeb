@@ -40,7 +40,7 @@ namespace GasWeb.Domain
                 pageSize = MaxPageSize;
 
             var offset = pageSize * (pageNumber - 1);
-            var resultsTask = query.Select(map).Take(pageSize).Skip(offset).ToListAsync();
+            var resultsTask = query.Select(map).Skip(offset).Take(pageSize).ToListAsync();
             var totalCountTask = query.LongCountAsync();
 
             await Task.WhenAll(new Task[] { resultsTask, totalCountTask });

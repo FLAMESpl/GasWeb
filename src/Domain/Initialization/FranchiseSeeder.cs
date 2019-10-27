@@ -12,7 +12,9 @@ namespace GasWeb.Domain.Initialization
     {
         private static readonly IReadOnlyCollection<string> KnownFranchises = new[]
         {
-            "Lotos"
+            "Lotos",
+            "Orlen",
+            "Bp"
         };
 
         private readonly GasWebDbContext dbContext;
@@ -52,6 +54,8 @@ namespace GasWeb.Domain.Initialization
 
             var franchises = existingFranchises.Concat(missingFranchises).ToDictionary(x => x.Name, x => x.Id);
             franchiseCollectionFactory.Lotos = franchises["Lotos"];
+            franchiseCollectionFactory.Orlen = franchises["Orlen"];
+            franchiseCollectionFactory.Bp = franchises["Bp"];
             franchiseCollectionFactory.Initialized = true;
         }
     }

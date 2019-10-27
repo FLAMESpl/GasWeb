@@ -4,6 +4,7 @@ using GasWeb.Shared.Users;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -13,10 +14,12 @@ namespace GasWeb.Server.Authentication
     public class AuthenticationController : ControllerBase
     {
         private readonly IUserService userService;
+        private readonly IAuthenticationSchemeProvider p;
 
-        public AuthenticationController(IUserService userService)
+        public AuthenticationController(IUserService userService, IAuthenticationSchemeProvider p)
         {
             this.userService = userService;
+            this.p = p;
         }
 
         [HttpPost("login")]
@@ -57,6 +60,12 @@ namespace GasWeb.Server.Authentication
         public async Task<IActionResult> AccessDenied()
         {
             return Unauthorized();
+        }
+
+        [HttpGet("login-facebook")]
+        public async Task LoginExternal(string callback)
+        {
+            await HttpContext.ChallengeAsync("Facebook", new AuthenticationProperties { RedirectUri = callback });
         }
 
         private async Task SignIn(User user)

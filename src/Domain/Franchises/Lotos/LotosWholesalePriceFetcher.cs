@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GasWeb.Domain.Franchises.Lotos
 {
-    internal class LotosWholesalePriceFetcher
+    internal class LotosWholesalePriceFetcher : IWholesalePriceProvider
     {
         private const string LotosWebPageUrl = "http://www.lotos.pl/144/poznaj_lotos/dla_biznesu/hurtowe_ceny_paliw";
 
@@ -18,23 +18,17 @@ namespace GasWeb.Domain.Franchises.Lotos
             this.httpClient = httpClient;
         }
 
-        public async Task<IReadOnlyCollection<(FuelType fuelType, decimal amount)>> GetPrices()
+        public async Task<IReadOnlyCollection<FuelTypePrice>> GetPrices()
         {
-            var response = await httpClient.GetAsync(LotosWebPageUrl);
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(content);
+            var htmlDocument = await httpClient.GetHtmlDocument(LotosWebPageUrl);
             var tableRows = htmlDocument.DocumentNode.SelectNodes("html/body/main/section[1]/div[1]/table[1]/tbody/tr");
-
             var petrolPrice = GetPriceFromTable(tableRows, "Benzyna bezołowiowa 95");
             var dieselPrice = GetPriceFromTable(tableRows, "Olej napędowy EURODIESEL");
 
             return new[]
             {
-                (FuelType.Petrol, petrolPrice),
-                (FuelType.Diesel, dieselPrice)
+                new FuelTypePrice(FuelType.Petrol, petrolPrice),
+                new FuelTypePrice(FuelType.Diesel, dieselPrice)
             };
         }
 
@@ -42,7 +36,8 @@ namespace GasWeb.Domain.Franchises.Lotos
         {
             var node = tableRows.Single(x => x.SelectSingleNode("td[1]").InnerText == fuelName);
             var stringPrice = node.SelectSingleNode("td[2]").InnerText;
-            return decimal.Parse(stringPrice.Replace(" ", ""));
+            var price = decimal.Parse(stringPrice.Replace(" ", ""));
+            return PriceCalculator.CalculateFromRateForCubicMeter(price);
         }
     }
 }

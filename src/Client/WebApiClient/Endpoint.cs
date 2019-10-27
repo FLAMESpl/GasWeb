@@ -54,9 +54,27 @@ namespace GasWeb.Client.WebApiClient
 
         public async Task<IReadOnlyCollection<T>> GetAllPages<T>(object queryParameters = null)
         {
-            var queryString = GetQueryStringParameters(queryParameters, new { pageSize = int.MaxValue });
-            var pageResponse = await httpClient.GetJsonAsync<PageResponse<T>>($"{Route}?{queryString}");
-            return pageResponse.Results;
+            var results = new List<T>();
+            var currentPage = 1;
+            var pageSize = int.MaxValue;
+
+            while(true)
+            {
+                var pageResponse = await GetPage<T>(currentPage, pageSize, queryParameters);
+                results.AddRange(pageResponse.Results);
+
+                if (results.Count < pageResponse.Paging.TotalCount && pageResponse.Results.Any())
+                {
+                    currentPage++;
+                }
+                else
+                {
+                    break;
+                }
+
+            }
+
+            return results;
         }
 
         private static string GetQueryStringParameters(object queryParametres = null, object additionalParameters = null)

@@ -1,5 +1,7 @@
 ﻿using FluentAssertions;
+using GasWeb.Domain.Franchises.Bp;
 using GasWeb.Domain.Franchises.Lotos;
+using GasWeb.Domain.Franchises.Orlen;
 using GasWeb.Shared;
 using System.Linq;
 using System.Net.Http;
@@ -18,9 +20,35 @@ namespace GasWeb.Server.Tests
             var prices = await fetcher.GetPrices();
 
             prices.Should().HaveCount(2);
-            prices.Should().ContainSingle(x => x.fuelType == FuelType.Petrol);
-            prices.Should().ContainSingle(x => x.fuelType == FuelType.Diesel);
-            prices.Select(x => x.amount).All(x => x > 3000M && x < 6000M).Should().BeTrue();
+            prices.Should().ContainSingle(x => x.FuelType == FuelType.Petrol);
+            prices.Should().ContainSingle(x => x.FuelType == FuelType.Diesel);
+            prices.Select(x => x.Amount).All(x => x > 2 && x < 6).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task OrlenFetcher_GetPrices_ShouldReturnNonZeroPrices()
+        {
+            using var httpClient = new HttpClient();
+            var fetcher = new OrlenWholesalePriceFetcher(httpClient);
+            var prices = await fetcher.GetPrices();
+
+            prices.Should().HaveCount(2);
+            prices.Should().ContainSingle(x => x.FuelType == FuelType.Petrol);
+            prices.Should().ContainSingle(x => x.FuelType == FuelType.Diesel);
+            prices.Select(x => x.Amount).All(x => x > 2 && x < 6).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task BpFetcher_GetPrices_ShouldReturnNonZeroPrices()
+        {
+            using var httpClient = new HttpClient();
+            var fetcher = new BpWholesalePriceFetcher(httpClient);
+            var prices = await fetcher.GetPrices();
+
+            prices.Should().HaveCount(2);
+            prices.Should().ContainSingle(x => x.FuelType == FuelType.Petrol);
+            prices.Should().ContainSingle(x => x.FuelType == FuelType.Diesel);
+            prices.Select(x => x.Amount).All(x => x > 2 && x < 6).Should().BeTrue();
         }
     }
 }

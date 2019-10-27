@@ -61,9 +61,9 @@ else
                     <td>@franchise.Name</td>
                     <td>@userNames[franchise.CreatedByUserId]</td>
                     <td>@franchise.ModifiedAt</td>
-                    <td>@franchise.FindPrice(FuelType.Petrol)</td>
-                    <td>@franchise.FindPrice(FuelType.Diesel)</td>
-                    <td>@franchise.FindPrice(FuelType.Gas)</td>
+                    <td>@franchise.FindPrice(FuelType.Petrol)?.ToDisplayAmount()</td>
+                    <td>@franchise.FindPrice(FuelType.Diesel)?.ToDisplayAmount()</td>
+                    <td>@franchise.FindPrice(FuelType.Gas)?.ToDisplayAmount()</td>
                 </tr>
             }
         </tbody>

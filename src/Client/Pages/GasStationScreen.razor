@@ -3,7 +3,6 @@
 @using GasWeb.Shared.GasStations
 @using GasWeb.Shared.Franchises
 @using GasWeb.Shared.PriceSubmissions
-@using GasWeb.Shared.Users
 @inject GasWebClient Client
 
 @if (initialized)
@@ -34,7 +33,7 @@
                 {
                     <tr>
                         <td>@price.FuelType.ToDisplayName()</td>
-                        <td>@price.Amount</td>
+                        <td>@price.Amount.ToDisplayAmount()</td>
                         <td>@price.ModifiedAt</td>
                     </tr>
                 }
@@ -42,95 +41,95 @@
         </table>
     }
 
-    <div class="card">
-        <div class="card-body">
-            <EditForm Model="@submitPriceModel" OnValidSubmit="@HandleSubmit">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
+        <EditForm Model="@submitPriceModel" OnValidSubmit="@HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-                <div class="form-group form-horizontal">
-                    <label for="fuelType">Rodzaj paliwa</label>
-                    <InputSelect Id="fuelType" Class="form-control" @bind-Value="@submitPriceModel.FuelType">
-                        <option value="@FuelType.Petrol">Benzyna</option>
-                        <option value="@FuelType.Diesel">Diesel</option>
-                        <option value="@FuelType.Gas">Gaz</option>
-                    </InputSelect>
-                    <ValidationMessage For="@(() => submitPriceModel.FuelType)" />
-                </div>
-
-                <div class="form-group form-horizontal">
-                    <label for="amount">Cena</label>
-                    <InputNumber Id="amount" Class="form-control" @bind-Value="@submitPriceModel.Amount" />
-                    <ValidationMessage For="@(() => submitPriceModel.Amount)" />
-                </div>
-
-                <div class="form-group form-horizontal">
-                    <button type="submit" class="btn btn-primary">Wyślij</button>
-                </div>
-            </EditForm>
-        </div>
-    </div>
-
-    if (refreshing)
-    {
-        <p><em>Loading...</em></p>
-    }
-    else
-    {
-        <EditForm Model="@getPriceSubmissions" OnValidSubmit="@HandleRefresh">
             <div class="card">
-                <div class="card-body" style="display:flex; align-items:flex-end">
-                    <div class="form-group" style="margin: 4px">
+                <div class="card-body form-horizontal">
+                    <div class="form-group">
                         <label for="fuelType">Rodzaj paliwa</label>
-                        <InputSelect Id="fuelType" Class="form-control" @bind-Value="@getPriceSubmissions.FuelTypes">
-                            <option value="@FuelType.All">Wszystkie</option>
+                        <InputSelect Id="fuelType" Class="form-control" @bind-Value="@submitPriceModel.FuelType">
                             <option value="@FuelType.Petrol">Benzyna</option>
                             <option value="@FuelType.Diesel">Diesel</option>
                             <option value="@FuelType.Gas">Gaz</option>
                         </InputSelect>
+                        <ValidationMessage For="@(() => submitPriceModel.FuelType)" />
                     </div>
-                    <div class="form-group" style="margin: 4px">
-                        <button type="submit" class="btn btn-primary">Odśwież</button>
+
+                    <div class="form-group">
+                        <label for="amount">Cena</label>
+                        <InputNumber Id="amount" Class="form-control" @bind-Value="@submitPriceModel.Amount" />
+                        <ValidationMessage For="@(() => submitPriceModel.Amount)" />
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Wyślij</button>
                     </div>
                 </div>
             </div>
         </EditForm>
 
         <table class="table">
-            <thead>
+            <thead class="zz">
                 <tr>
                     <th>Id</th>
                     <th>Rodzaj paliwa</th>
-                    <th>Cena</th>
-                    <th>Utworzono przez</th>
+                    <th style="vertical-align:top">Cena</th>
+                    <th class="zz">Utworzono przez</th>
                     <th>Data dodania</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th>
+                        <select Id="fuelType" @onchange="HandleRefresh" Class="form-control">
+                            <option value="@((int)FuelType.All)">Wszystkie</option>
+                            <option value="@((int)FuelType.Petrol)">Benzyna</option>
+                            <option value="@((int)FuelType.Diesel)">Diesel</option>
+                            <option value="@((int)FuelType.Gas)">Gaz</option>
+                        </select>
+                    </th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var priceSubmission in priceSubmissions)
+                @if (!refreshing)
                 {
-                    <tr>
-                        <td>@priceSubmission.Id</td>
-                        <td>@priceSubmission.FuelType.ToDisplayName()</td>
-                        <td>@priceSubmission.Amount</td>
-                        <td>@userNames[priceSubmission.CreatedByUserId]</td>
-                        <td>@priceSubmission.ModifiedAt</td>
-                    </tr>
+                    @foreach (var priceSubmission in priceSubmissions)
+                    {
+                        <tr>
+                            <td>@priceSubmission.Id</td>
+                            <td>@priceSubmission.FuelType.ToDisplayName()</td>
+                            <td>@priceSubmission.Amount.ToDisplayAmount()</td>
+                            <td>@userNames[priceSubmission.CreatedByUserId]</td>
+                            <td>@priceSubmission.ModifiedAt</td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>
     }
-}
-else
-{
-    <p><em>Loading...</em></p>
-}
+    else
+    {
+        <p><em>Loading...</em></p>
+    }
 
 <style>
     .form-horizontal {
-        float: left;
-        margin: 4px;
+        display: flex;
+        align-items: flex-end;
     }
+
+    .form-horizontal *.form-group {
+        margin: 4px
+    }
+
+    .zz {
+        vertical-align: top;
+    }
+
 </style>
 
 @code {
@@ -143,7 +142,7 @@ else
     bool initialized = false;
     bool refreshing = false;
     SubmitPriceModel submitPriceModel;
-    GetPriceSubmissions getPriceSubmissions;
+    FuelType fuelTypes = FuelType.All;
 
     protected override async Task OnInitializedAsync()
     {
@@ -161,20 +160,32 @@ else
             franchise = await Client.Franchises.Get(gasStation.FranchiseId.Value);
 
         submitPriceModel = new SubmitPriceModel { GasStationId = GasStationId, FuelType = FuelType.Petrol };
-        getPriceSubmissions = new GetPriceSubmissions { FuelTypes = FuelType.All };
 
         initialized = true;
     }
 
-    private async Task HandleRefresh()
+    private async Task HandleRefresh(ChangeEventArgs eventArgs)
+    {
+        fuelTypes = (FuelType)int.Parse(eventArgs.Value.ToString());
+        await Refresh();
+    }
+
+    private async Task HandleSubmit()
+    {
+        refreshing = true;
+        await Client.PriceSubmissions.Create(submitPriceModel);
+        await Refresh();
+    }
+
+    private async Task Refresh()
     {
         refreshing = true;
 
         Console.Write("Queried fuel type: ");
-        Console.WriteLine(getPriceSubmissions.FuelTypes);
+        Console.WriteLine(fuelTypes);
 
         var usersTask = Client.Users.GetList();
-        var priceSubmissionsTask = Client.PriceSubmissions.GetAllPages(new { GasStationId, getPriceSubmissions.FuelTypes });
+        var priceSubmissionsTask = Client.PriceSubmissions.GetAllPages(new { GasStationId, fuelTypes });
 
         await Task.WhenAll(priceSubmissionsTask, usersTask);
 
@@ -182,12 +193,5 @@ else
         priceSubmissions = priceSubmissionsTask.Result;
 
         refreshing = false;
-    }
-
-    private async Task HandleSubmit()
-    {
-        refreshing = true;
-        await Client.PriceSubmissions.Create(submitPriceModel);
-        await HandleRefresh();
     }
 }

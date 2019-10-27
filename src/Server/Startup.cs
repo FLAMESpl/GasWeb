@@ -80,6 +80,13 @@ namespace GasWeb.Server
                 {
                     options.LoginPath = "/auth/login";
                     options.AccessDeniedPath = "/auth/accessdenied";
+                })
+                .AddCookie("TempCookie")
+                .AddFacebook(options =>
+                {
+                    options.AppId = "903162020039531";
+                    options.AppSecret = "1962fbb0753ad5383a67f7a6b1a29436";
+                    options.SignInScheme = "TempCookie";
                 });
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
