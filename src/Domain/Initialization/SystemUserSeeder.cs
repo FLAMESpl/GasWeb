@@ -25,7 +25,8 @@ namespace GasWeb.Domain.Initialization
 
             var systemUser = new User(
                 name: "System",
-                password: null,
+                nameId: "SYSTEM",
+                authenticationSchema: AuthenticationSchema.Internal,
                 role: Shared.Users.UserRole.System,
                 active: true);
 

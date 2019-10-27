@@ -1,5 +1,4 @@
-﻿using GasWeb.Domain.Exceptions;
-using GasWeb.Shared.Authentication;
+﻿using GasWeb.Shared.Authentication;
 using GasWeb.Shared.Users;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -10,7 +9,7 @@ namespace GasWeb.Domain.Users
 {
     public interface IUserService
     {
-        Task<User> Add(RegisterModel registerModel);
+        Task<User> Add(string nameId, RegisterModel registerModel);
         Task<User> TryLogIn(LoginModel logInModel);
         Task<User> Get(long id);
         Task Update(long id, UserUpdateModel updateModel);
@@ -26,12 +25,13 @@ namespace GasWeb.Domain.Users
             this.dbContext = dbContext;
         }
 
-        public async Task<User> Add(RegisterModel registerModel)
+        public async Task<User> Add(string nameId, RegisterModel registerModel)
         {
             var user = new Entities.User(
-                registerModel.Username, 
-                registerModel.Password,
-                registerModel.Role,
+                nameId: nameId,
+                authenticationSchema: Entities.AuthenticationSchema.Facebook,
+                name: registerModel.Username,
+                role: registerModel.Role,
                 active: true);
 
             dbContext.Add(user);
@@ -41,10 +41,8 @@ namespace GasWeb.Domain.Users
 
         public async Task<User> TryLogIn(LoginModel logInModel)
         {
-            var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Name == logInModel.Username);
-
-            if (user == null || user.Password != logInModel.Password)
-                return null;
+            var user = await dbContext.Users.FirstOrDefaultAsync(x => x.NameId == logInModel.NameId 
+                && x.AuthenticationSchema == Entities.AuthenticationSchema.Facebook);
 
             return user.ToContract();
         }

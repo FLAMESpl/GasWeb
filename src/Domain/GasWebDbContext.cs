@@ -23,7 +23,7 @@ namespace GasWeb.Domain
 
             modelBuilder.Entity<User>(b =>
             {
-                b.HasIndex(x => x.Name).IsUnique();
+                b.HasIndex(x => new { x.NameId, x.AuthenticationSchema }).IsUnique();
             });
 
             modelBuilder.AuditEntity<GasStation>(b =>

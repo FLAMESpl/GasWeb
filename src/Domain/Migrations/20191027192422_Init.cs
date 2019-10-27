@@ -14,8 +14,9 @@ namespace GasWeb.Domain.Migrations
                 {
                     Id = table.Column<long>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    NameId = table.Column<string>(nullable: true),
+                    AuthenticationSchema = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true),
-                    Password = table.Column<string>(nullable: true),
                     Role = table.Column<int>(nullable: false),
                     Active = table.Column<bool>(nullable: false)
                 },
@@ -49,6 +50,26 @@ namespace GasWeb.Domain.Migrations
                         name: "FK_Franchises_Users_ModifiedByUserId",
                         column: x => x.ModifiedByUserId,
                         principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FranchiseWholesalePrice",
+                columns: table => new
+                {
+                    FranchiseId = table.Column<long>(nullable: false),
+                    FuelType = table.Column<int>(nullable: false),
+                    Amount = table.Column<decimal>(nullable: false),
+                    ModifiedAt = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FranchiseWholesalePrice", x => new { x.FranchiseId, x.FuelType });
+                    table.ForeignKey(
+                        name: "FK_FranchiseWholesalePrice_Franchises_FranchiseId",
+                        column: x => x.FranchiseId,
+                        principalTable: "Franchises",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -139,6 +160,12 @@ namespace GasWeb.Domain.Migrations
                 column: "ModifiedByUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Franchises_Name",
+                table: "Franchises",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_GasStations_CreatedByUserId",
                 table: "GasStations",
                 column: "CreatedByUserId");
@@ -169,14 +196,17 @@ namespace GasWeb.Domain.Migrations
                 column: "ModifiedByUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_Name",
+                name: "IX_Users_NameId_AuthenticationSchema",
                 table: "Users",
-                column: "Name",
+                columns: new[] { "NameId", "AuthenticationSchema" },
                 unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "FranchiseWholesalePrice");
+
             migrationBuilder.DropTable(
                 name: "PriceSubmissions");
 

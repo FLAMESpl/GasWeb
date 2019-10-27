@@ -133,15 +133,17 @@ namespace GasWeb.Domain.Migrations
 
                     b.Property<bool>("Active");
 
+                    b.Property<int>("AuthenticationSchema");
+
                     b.Property<string>("Name");
 
-                    b.Property<string>("Password");
+                    b.Property<string>("NameId");
 
                     b.Property<int>("Role");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("NameId", "AuthenticationSchema")
                         .IsUnique();
 
                     b.ToTable("Users");

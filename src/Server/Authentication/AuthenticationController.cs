@@ -24,9 +24,16 @@ namespace GasWeb.Server.Authentication
 
         [HttpPost("login")]
         //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> LogIn([FromBody] LoginModel logInModel)
+        public async Task<IActionResult> LogIn()
         {
-            var user = await userService.TryLogIn(logInModel);
+            var authResult = await HttpContext.AuthenticateAsync("TempCookie");
+            if (!authResult.Succeeded)
+            {
+                return BadRequest(new RegisterResult { Successful = false, Error = AuthenticationErrorCodes.NotAuthenticatedByExternalProvider });
+            }
+
+            var nameId = authResult.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await userService.TryLogIn(new LoginModel { NameId = nameId });
 
             if (user != null)
             {
@@ -35,7 +42,7 @@ namespace GasWeb.Server.Authentication
             }
             else
             {
-                return BadRequest(new LoginResult { Successful = false, Error = "Invalid credentials" });
+                return BadRequest(new LoginResult { Successful = false, Error = AuthenticationErrorCodes.NotRegistered });
             }
         }
 
@@ -43,7 +50,21 @@ namespace GasWeb.Server.Authentication
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Register([FromBody] RegisterModel registerModel)
         {
-            var user = await userService.Add(registerModel);
+            var authResult = await HttpContext.AuthenticateAsync("TempCookie");
+            if (!authResult.Succeeded)
+            {
+                return BadRequest(new RegisterResult { Successful = false, Error = AuthenticationErrorCodes.NotAuthenticatedByExternalProvider });
+            }
+
+            var nameId = authResult.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await userService.TryLogIn(new LoginModel { NameId = nameId });
+
+            if (user != null)
+            {
+                return BadRequest(new RegisterResult { Successful = false, Error = AuthenticationErrorCodes.AlreadyRegistered });
+            }
+
+            user = await userService.Add(nameId, registerModel);
             await SignIn(user);
             return Ok(new RegisterResult { Successful = true });
         }
@@ -80,6 +101,7 @@ namespace GasWeb.Server.Authentication
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
+            await HttpContext.SignOutAsync("TempCookie");
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
         }
     } 

@@ -1,4 +1,4 @@
-﻿@page "/register"
+﻿@page "/register-test"
 @inject IAuthService AuthService
 @inject NavigationManager NavigationManager
 @using GasWeb.Shared.Authentication;
@@ -42,6 +42,11 @@
     private RegisterModel RegisterModel = new RegisterModel { Role = GasWeb.Shared.Users.UserRole.Admin };
     private bool ShowErrors;
     private IEnumerable<string> Errors;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
 
     private async Task HandleRegistration()
     {
