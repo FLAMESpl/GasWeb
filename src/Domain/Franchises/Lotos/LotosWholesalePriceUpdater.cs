@@ -1,6 +1,5 @@
 ﻿using GasWeb.Domain.Franchises.Entities;
 using GasWeb.Shared;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

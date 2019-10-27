@@ -39,11 +39,6 @@ namespace GasWeb.Domain.Initialization
                 {
                     var franchise = new Franchise(name, true);
                     auditMetadataProvider.AddAuditMetadataToNewEntity(franchise);
-
-                    franchise.WholesalePrices.Add(new FranchiseWholesalePrice(0, Shared.FuelType.Petrol, 5.05M, DateTime.Now));
-                    franchise.WholesalePrices.Add(new FranchiseWholesalePrice(0, Shared.FuelType.Diesel, 4.95M, DateTime.Now));
-                    franchise.WholesalePrices.Add(new FranchiseWholesalePrice(0, Shared.FuelType.Gas, 2.0M, DateTime.Now));
-
                     return franchise;
                 })
                 .ToList();

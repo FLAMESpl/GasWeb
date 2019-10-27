@@ -2,7 +2,7 @@
 @using GasWeb.Shared
 @using GasWeb.Shared.Franchises
 @using GasWeb.Shared.Users
-@inject HttpClient Http
+@inject GasWebClient Client
 @inject NavigationManager NavigationManager
 
 <h1>Franczyzny</h1>
@@ -41,7 +41,7 @@ else
             </div>
     </div>
 
-    <table class="hoverTable table">
+    <table class="table">
         <thead>
             <tr>
                 <th>Id</th>
@@ -89,9 +89,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var users = await Http.GetJsonAsync<User[]>("api/users");
-        var gasStationsResponse = await Http.GetJsonAsync<PageResponse<Franchise>>("api/franchises");
-        franchises = gasStationsResponse.Results;
+        var users = await Client.Users.GetList();
+        franchises = await Client.Franchises.GetAllPages();
         userNames = users.ToDictionary(x => x.Id, x => x.Name);
     }
 
@@ -99,7 +98,7 @@ else
     {
         franchises = null;
         expandEditForm = false;
-        await Http.PostJsonAsync("api/franchises", addFranchiseModel);
+        await Client.Franchises.Create(addFranchiseModel);
         addFranchiseModel = new AddFranchiseModel();
         await OnInitializedAsync();
     }

@@ -1,6 +1,6 @@
 ﻿@page "/users"
 @using GasWeb.Shared.Users
-@inject HttpClient Http
+@inject GasWebClient Client
 
 <h1>Użytkownicy</h1>
 
@@ -34,11 +34,10 @@ else
 }
 
 @code {
-    User[] users;
+    IReadOnlyCollection<User> users;
 
     protected override async Task OnInitializedAsync()
     {
-        users = await Http.GetJsonAsync<User[]>("api/users");
+        users = await Client.Users.GetList();
     }
-
 }

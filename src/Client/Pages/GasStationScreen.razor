@@ -4,7 +4,7 @@
 @using GasWeb.Shared.Franchises
 @using GasWeb.Shared.PriceSubmissions
 @using GasWeb.Shared.Users
-@inject HttpClient Http
+@inject GasWebClient Client
 
 @if (initialized)
 {
@@ -77,10 +77,10 @@
     }
     else
     {
-        <div class="card">
-            <div class="card-body">
-                <EditForm Model="@getPriceSubmissions" OnValidSubmit="@HandleRefresh">
-                    <div class="form-group form-horizontal">
+        <EditForm Model="@getPriceSubmissions" OnValidSubmit="@HandleRefresh">
+            <div class="card">
+                <div class="card-body" style="display:flex; align-items:flex-end">
+                    <div class="form-group" style="margin: 4px">
                         <label for="fuelType">Rodzaj paliwa</label>
                         <InputSelect Id="fuelType" Class="form-control" @bind-Value="@getPriceSubmissions.FuelTypes">
                             <option value="@FuelType.All">Wszystkie</option>
@@ -89,12 +89,12 @@
                             <option value="@FuelType.Gas">Gaz</option>
                         </InputSelect>
                     </div>
-                    <div class="form-group form-horizontal">
+                    <div class="form-group" style="margin: 4px">
                         <button type="submit" class="btn btn-primary">Odśwież</button>
                     </div>
-                </EditForm>
+                </div>
             </div>
-        </div>
+        </EditForm>
 
         <table class="table">
             <thead>
@@ -147,18 +147,18 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var gasStationTask = Http.GetJsonAsync<GasStation>($"api/gas-stations/{GasStationId}");
-        var priceSubmissionsTask = Http.GetJsonAsync<PageResponse<PriceSubmission>>($"api/price-submissions?gasStationId={GasStationId}");
-        var usersTask = Http.GetJsonAsync<User[]>("api/users");
+        var gasStationTask = Client.GasStations.Get(GasStationId);
+        var priceSubmissionsTask = Client.PriceSubmissions.GetAllPages(new { GasStationId });
+        var usersTask = Client.Users.GetList();
 
         await Task.WhenAll(gasStationTask, priceSubmissionsTask, usersTask);
 
         gasStation = gasStationTask.Result;
-        priceSubmissions = priceSubmissionsTask.Result.Results;
+        priceSubmissions = priceSubmissionsTask.Result;
         userNames = usersTask.Result.ToDictionary(x => x.Id, x => x.Name);
 
         if (gasStation.FranchiseId.HasValue)
-            franchise = await Http.GetJsonAsync<Franchise>($"api/franchises/{gasStation.FranchiseId}");
+            franchise = await Client.Franchises.Get(gasStation.FranchiseId.Value);
 
         submitPriceModel = new SubmitPriceModel { GasStationId = GasStationId, FuelType = FuelType.Petrol };
         getPriceSubmissions = new GetPriceSubmissions { FuelTypes = FuelType.All };
@@ -173,14 +173,13 @@ else
         Console.Write("Queried fuel type: ");
         Console.WriteLine(getPriceSubmissions.FuelTypes);
 
-        var usersTask = Http.GetJsonAsync<User[]>("api/users");
-        var priceSubmissionsTask = Http.GetJsonAsync<PageResponse<PriceSubmission>>(
-            $"api/price-submissions?gasStationId={GasStationId}&fuelTypes={getPriceSubmissions.FuelTypes}");
+        var usersTask = Client.Users.GetList();
+        var priceSubmissionsTask = Client.PriceSubmissions.GetAllPages(new { GasStationId, getPriceSubmissions.FuelTypes });
 
         await Task.WhenAll(priceSubmissionsTask, usersTask);
 
         userNames = usersTask.Result.ToDictionary(x => x.Id, x => x.Name);
-        priceSubmissions = priceSubmissionsTask.Result.Results;
+        priceSubmissions = priceSubmissionsTask.Result;
 
         refreshing = false;
     }
@@ -188,12 +187,7 @@ else
     private async Task HandleSubmit()
     {
         refreshing = true;
-        await Http.PostJsonAsync<SubmitPriceModel>("api/price-submissions", submitPriceModel);
+        await Client.PriceSubmissions.Create(submitPriceModel);
         await HandleRefresh();
-    }
-
-    private string FormatLocation(Location location)
-    {
-        return $"{ SexagesimalAngle.FromDouble(location.Longitude) } { SexagesimalAngle.FromDouble(location.Latitude) }";
     }
 }

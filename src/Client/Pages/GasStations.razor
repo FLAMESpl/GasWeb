@@ -4,7 +4,7 @@
 @using GasWeb.Shared.Franchises
 @using GasWeb.Shared.Users
 @using GasWeb.Client.Pages.ViewModels
-@inject HttpClient Http
+@inject GasWebClient Client
 @inject NavigationManager NavigationManager
 
 <h1>Stacje benzynowe</h1>
@@ -114,15 +114,15 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var usersTask = Http.GetJsonAsync<User[]>("api/users");
-        var franchisesTask = Http.GetJsonAsync<PageResponse<Franchise>>("api/franchises");
-        var gasStationsTask = Http.GetJsonAsync<PageResponse<GasStation>>("api/gas-stations");
+        var usersTask = Client.Users.GetList();
+        var franchisesTask = Client.Franchises.GetAllPages();
+        var gasStationsTask = Client.GasStations.GetAllPages();
 
         await Task.WhenAll(usersTask, franchisesTask, gasStationsTask);
 
-        gasStations = gasStationsTask.Result.Results;
+        gasStations = gasStationsTask.Result;
         userNames = usersTask.Result.ToDictionary(x => x.Id, x => x.Name);
-        franchiseNames = franchisesTask.Result.Results.ToDictionary(x => x.Id, x => x.Name);
+        franchiseNames = franchisesTask.Result.ToDictionary(x => x.Id, x => x.Name);
     }
 
     private void NaviagateToGasStation(long gasStationId)
@@ -134,7 +134,7 @@ else
     {
         gasStations = null;
         expandEditForm = false;
-        await Http.PostJsonAsync("api/gas-stations", addGasStationViewModel.ToModel(franchiseNames));
+        await Client.GasStations.Create(addGasStationViewModel.ToModel(franchiseNames));
         addGasStationViewModel = new AddGasStationViewModel { Location = new Location() };
         await OnInitializedAsync();
     }

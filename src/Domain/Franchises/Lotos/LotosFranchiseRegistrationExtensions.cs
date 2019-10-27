@@ -6,8 +6,6 @@ namespace GasWeb.Domain.Franchises.Lotos
     {
         public static void RegisterLotosComponents(this IServiceCollection services)
         {
-            services.AddScoped<ILotosWholesalePriceUpdater, LotosWholesalePriceUpdater>();
-            services.AddScoped<LotosWholesalePriceFetcher>();
         }
     }
 }

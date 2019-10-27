@@ -1,6 +1,7 @@
 ﻿using GasWeb.Domain.Franchises;
 using GasWeb.Domain.Franchises.Lotos;
 using GasWeb.Domain.GasStations;
+using GasWeb.Domain.GasStations.Lotos;
 using GasWeb.Domain.Initialization;
 using GasWeb.Domain.PriceSubmissions;
 using GasWeb.Domain.Users;
@@ -22,8 +23,20 @@ namespace GasWeb.Domain
             services.AddScoped(sp => sp.GetRequiredService<SystemFranchiseCollectionFactory>().Create());
             services.AddScoped<UserContextAuditMetadataProvider>();
             services.RegisterInitializationComponents();
-            services.RegisterLotosComponents();
+
+            AddLotosComponents(services);
+
             return services;
         }
+
+        private void AddLotosComponents(IServiceCollection services)
+        {
+            services.AddScoped<ILotosWholesalePriceUpdater, LotosWholesalePriceUpdater>();
+            services.AddScoped<LotosWholesalePriceFetcher>();
+            services.AddScoped<ILotosGasStationsUpdater, LotosGasStationsUpdater>();
+            services.AddScoped<LotosGasStationsFetcher>();
+        }
+
+
     }
 }
