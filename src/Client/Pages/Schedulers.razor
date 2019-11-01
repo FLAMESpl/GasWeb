@@ -1,0 +1,67 @@
+﻿@page "/schedulers"
+@using GasWeb.Shared.Schedulers
+@inject GasWebClient Client
+@inject NavigationManager NavigationManager
+
+<h1>Planer zadań</h1>
+
+@if (initialized)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Franczyzna</th>
+                <th>Ostatnia modyfikacja</th>
+                <th>Uruchomiony</th>
+                <th>Następne uruchomienie</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var scheduler in schedulers)
+            {
+                <tr>
+                    <td>@franchiseNames[scheduler.FranchiseId]</td>
+                    <td>@scheduler.LastModifiedAt (@userNames[scheduler.LastModifiedByUserId])</td>
+                    <td>@(scheduler.StartedAt != null)</td>
+                    <td>@CalculateNextTrigger(scheduler)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p><em>Loading...</em></p>
+}
+
+@code {
+    IReadOnlyCollection<Scheduler> schedulers;
+    Dictionary<long, string> userNames;
+    Dictionary<long, string> franchiseNames;
+    bool initialized = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var usersTask = Client.Users.GetList();
+        var franchisesTask = Client.Franchises.GetAllPages();
+        var schedulersTask = Client.Schedulers.GetAllPages();
+
+        await Task.WhenAll(usersTask, franchisesTask, schedulersTask);
+
+        schedulers = schedulersTask.Result;
+        userNames = usersTask.Result.ToDictionary(x => x.Id, x => x.Name);
+        franchiseNames = franchisesTask.Result.ToDictionary(x => x.Id, x => x.Name);
+
+        initialized = true;
+    }
+
+    private string CalculateNextTrigger(Scheduler scheduler)
+    {
+        if (scheduler.StartedAt == null) return String.Empty;
+
+        var durationFromStart = DateTime.UtcNow - scheduler.StartedAt.Value;
+        var triggerCount = durationFromStart.Ticks / scheduler.Interval.Ticks;
+        var nextTrigger = scheduler.StartedAt.Value + TimeSpan.FromTicks((triggerCount + 1) * scheduler.Interval.Ticks);
+        return nextTrigger.ToString();
+    }
+}

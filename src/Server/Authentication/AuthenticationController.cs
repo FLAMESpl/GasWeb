@@ -4,7 +4,6 @@ using GasWeb.Shared.Users;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -14,35 +13,46 @@ namespace GasWeb.Server.Authentication
     public class AuthenticationController : ControllerBase
     {
         private readonly IUserService userService;
-        private readonly IAuthenticationSchemeProvider p;
 
-        public AuthenticationController(IUserService userService, IAuthenticationSchemeProvider p)
+        public AuthenticationController(IUserService userService)
         {
             this.userService = userService;
-            this.p = p;
         }
 
-        [HttpPost("login")]
+        [HttpGet("login")]
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> LogIn()
         {
             var authResult = await HttpContext.AuthenticateAsync("TempCookie");
             if (!authResult.Succeeded)
             {
-                return BadRequest(new RegisterResult { Successful = false, Error = AuthenticationErrorCodes.NotAuthenticatedByExternalProvider });
+                return BadRequest(new RegisterResult 
+                { 
+                    Successful = false, 
+                    Error = AuthenticationErrorCodes.NotAuthenticatedByExternalProvider 
+                });
             }
 
             var nameId = authResult.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await userService.TryLogIn(new LoginModel { NameId = nameId });
+            var user = await userService.FindByNameId(nameId);
 
             if (user != null)
             {
                 await SignIn(user);
-                return Ok(new LoginResult { Successful = true, User = user });
+                return Ok(new LoginResult 
+                { 
+                    Successful = true, 
+                    User = user
+                });
             }
             else
             {
-                return BadRequest(new LoginResult { Successful = false, Error = AuthenticationErrorCodes.NotRegistered });
+                return BadRequest(new LoginResult 
+                { 
+                    Successful = false, 
+                    Error = AuthenticationErrorCodes.NotRegistered,
+                    ExternalUsername = authResult.Principal.FindFirstValue(ClaimTypes.Name)
+                });
             }
         }
 
@@ -57,7 +67,7 @@ namespace GasWeb.Server.Authentication
             }
 
             var nameId = authResult.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await userService.TryLogIn(new LoginModel { NameId = nameId });
+            var user = await userService.FindByNameId(nameId);
 
             if (user != null)
             {

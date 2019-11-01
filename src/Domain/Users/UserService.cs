@@ -10,7 +10,7 @@ namespace GasWeb.Domain.Users
     public interface IUserService
     {
         Task<User> Add(string nameId, RegisterModel registerModel);
-        Task<User> TryLogIn(LoginModel logInModel);
+        Task<User> FindByNameId(string nameId);
         Task<User> Get(long id);
         Task Update(long id, UserUpdateModel updateModel);
         Task<IReadOnlyCollection<User>> GetList();
@@ -39,12 +39,12 @@ namespace GasWeb.Domain.Users
             return user.ToContract();
         }
 
-        public async Task<User> TryLogIn(LoginModel logInModel)
+        public async Task<User> FindByNameId(string nameId)
         {
-            var user = await dbContext.Users.FirstOrDefaultAsync(x => x.NameId == logInModel.NameId 
+            var user = await dbContext.Users.FirstOrDefaultAsync(x => x.NameId == nameId 
                 && x.AuthenticationSchema == Entities.AuthenticationSchema.Facebook);
 
-            return user.ToContract();
+            return user?.ToContract();
         }
 
         public async Task<User> Get(long id)

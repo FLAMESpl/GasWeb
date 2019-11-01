@@ -2,6 +2,7 @@
 @inject IAuthService AuthService
 @inject NavigationManager NavigationManager
 @using GasWeb.Shared.Authentication;
+@using GasWeb.Shared.Users;
 
 <h1>Login</h1>
 
@@ -12,39 +13,59 @@
     </div>
 }
 
-@*<div class="card">
-    <div class="card-body">
-        <h5 class="card-title">Please enter your details</h5>
-        <EditForm Model="@loginModel" OnValidSubmit="@HandleLogin">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
+@if (ShowRegistrationForm)
+{
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Please enter your details</h5>
+            <EditForm Model="registerModel" OnValidSubmit="HandleRegistration">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
 
-            <div class="form-group">
-                <label for="username">Username</label>
-                <InputText Id="username" Class="form-control" @bind-Value="@loginModel.Username" />
-                <ValidationMessage For="@(() => loginModel.Username)" />
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <InputText Id="password" type="password" Class="form-control" @bind-Value="@loginModel.Password" />
-                <ValidationMessage For="@(() => loginModel.Password)" />
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </EditForm>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <InputText Id="username" Class="form-control" @bind-Value="@registerModel.Username" />
+                    <ValidationMessage For="@(() => registerModel.Username)" />
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </EditForm>
+        </div>
     </div>
-</div>*@
+}
 
 @code {
 
-    private LoginModel loginModel = new LoginModel();
+    private RegisterModel registerModel = new RegisterModel { Role = UserRole.Admin };
     private bool ShowErrors;
+    private bool ShowRegistrationForm;
     private string Error = "";
 
-    private async Task HandleLogin()
+    protected override async Task OnInitializedAsync()
     {
         ShowErrors = false;
+        ShowRegistrationForm = false;
 
-        var result = await AuthService.Login(loginModel);
+        var result = await AuthService.Login();
+
+        if (result.Successful)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        else if (result.Error == AuthenticationErrorCodes.NotRegistered)
+        {
+            registerModel.Username = result.ExternalUsername ?? String.Empty;
+            ShowRegistrationForm = true;
+        }
+        else
+        {
+            ShowErrors = true;
+            Error = "Błąd uwierzytelniania przez zewnętrznego dostawce.";
+        }
+    }
+
+    private async Task HandleRegistration()
+    {
+        var result = await AuthService.Register(registerModel);
 
         if (result.Successful)
         {
@@ -52,9 +73,8 @@
         }
         else
         {
-            Error = result.Error;
             ShowErrors = true;
+            Error = result.Error;
         }
     }
-
 }

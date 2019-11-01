@@ -42,14 +42,16 @@ namespace GasWeb.Client.WebApiClient
 
         public Task<IReadOnlyCollection<T>> GetList<T>(object queryParameters = null)
         {
-            var queryString = GetQueryStringParameters(queryParameters);
-            return httpClient.GetJsonAsync<IReadOnlyCollection<T>>(string.IsNullOrEmpty(queryString) ? Route : $"{Route}?{queryString}");
+            return httpClient.Get<IReadOnlyCollection<T>>(Route, queryParameters);
         }
 
         public Task<PageResponse<T>> GetPage<T>(int pageNumber, int pageSize, object queryParameters = null)
         {
-            var queryString = GetQueryStringParameters(queryParameters, new { pageNumber, pageSize });
-            return httpClient.GetJsonAsync<PageResponse<T>>($"{Route}?{queryString}");
+            return httpClient.Get<PageResponse<T>>(Route, new RouteValueDictionary(queryParameters)
+            {
+                { "pageNumber", pageNumber },
+                { "pageSize", pageSize }
+            });
         }
 
         public async Task<IReadOnlyCollection<T>> GetAllPages<T>(object queryParameters = null)
@@ -75,25 +77,6 @@ namespace GasWeb.Client.WebApiClient
             }
 
             return results;
-        }
-
-        private static string GetQueryStringParameters(object queryParametres = null, object additionalParameters = null)
-        {
-            var parameters = Enumerable.Empty<KeyValuePair<string, object>>();
-
-            if (queryParametres != null)
-            {
-                var dictionary = new RouteValueDictionary(queryParametres);
-                parameters = parameters.Concat(dictionary);
-            }
-
-            if (additionalParameters != null)
-            {
-                var dictionary = new RouteValueDictionary(additionalParameters);
-                parameters = parameters.Concat(dictionary);
-            }
-
-            return string.Join("&", parameters.Select(x => $"{x.Key}={x.Value.ToString()}"));
         }
     }
 

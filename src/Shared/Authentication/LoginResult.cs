@@ -7,5 +7,6 @@ namespace GasWeb.Shared.Authentication
         public bool Successful { get; set; }
         public string Error { get; set; }
         public User User { get; set; }
+        public string ExternalUsername { get; set; }
     }
 }

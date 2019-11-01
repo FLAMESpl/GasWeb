@@ -6,6 +6,7 @@ using GasWeb.Domain.GasStations;
 using GasWeb.Domain.GasStations.Lotos;
 using GasWeb.Domain.Initialization;
 using GasWeb.Domain.PriceSubmissions;
+using GasWeb.Domain.Schedulers;
 using GasWeb.Domain.Users;
 using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.CompilerServices;
@@ -22,6 +23,7 @@ namespace GasWeb.Domain
             services.AddScoped<IGasStationService, GasStationService>();
             services.AddScoped<IPriceSubmissionsService, PriceSubmissionsService>();
             services.AddScoped<IFranchiseService, FranchiseService>();
+            services.AddScoped<ISchedulerService, SchedulerService>();
             services.AddScoped(sp => sp.GetRequiredService<SystemFranchiseCollectionFactory>().Create());
             services.AddScoped<UserContextAuditMetadataProvider>();
             services.RegisterInitializationComponents();

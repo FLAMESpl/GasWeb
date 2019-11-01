@@ -12,15 +12,18 @@ namespace GasWeb.Domain.Initialization
     {
         private readonly SystemUserSeeder systemUserSeeder;
         private readonly FranchiseSeeder franchiseSeeder;
+        private readonly SchedulerSeeder schedulerSeeder;
         private readonly ILogger<SystemInitializer> logger;
 
         public SystemInitializer(
             SystemUserSeeder systemUserSeeder,
             FranchiseSeeder franchiseSeeder,
+            SchedulerSeeder schedulerSeeder,
             ILogger<SystemInitializer> logger)
         {
             this.systemUserSeeder = systemUserSeeder;
             this.franchiseSeeder = franchiseSeeder;
+            this.schedulerSeeder = schedulerSeeder;
             this.logger = logger;
         }
 
@@ -29,7 +32,9 @@ namespace GasWeb.Domain.Initialization
             logger.LogInitializationProcess("Start");
 
             var systemUserId = await systemUserSeeder.SeedSystemUser();
-            await franchiseSeeder.SeedKnownFranchises(new SystemUserMetadataProvider(systemUserId));
+            var metadataProvider = new SystemUserMetadataProvider(systemUserId);
+            await franchiseSeeder.SeedKnownFranchises(metadataProvider);
+            await schedulerSeeder.SeedSchedulers(metadataProvider);
 
             logger.LogInitializationProcess("End");
         }

@@ -3,14 +3,13 @@ using GasWeb.Shared.Authentication;
 using Microsoft.AspNetCore.Components;
 using Newtonsoft.Json;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GasWeb.Client.Services
 {
     public interface IAuthService
     {
-        Task<LoginResult> Login(LoginModel model);
+        Task<LoginResult> Login();
         Task Logout();
         Task<RegisterResult> Register(RegisterModel model);
     }
@@ -31,10 +30,9 @@ namespace GasWeb.Client.Services
             this.localStorage = localStorage;
         }
 
-        public async Task<LoginResult> Login(LoginModel model)
+        public async Task<LoginResult> Login()
         {
-            var content = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
-            var response = await httpClient.PostAsync("api/auth/login", content);
+            var response = await httpClient.GetAsync("api/auth/login");
             var stringResult = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<LoginResult>(stringResult);
             if (result.Successful)

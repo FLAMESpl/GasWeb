@@ -1,6 +1,7 @@
 ﻿using GasWeb.Domain.Franchises.Entities;
 using GasWeb.Domain.GasStations.Entities;
 using GasWeb.Domain.PriceSubmissions.Entities;
+using GasWeb.Domain.Schedulers.Entities;
 using GasWeb.Domain.Users.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,7 @@ namespace GasWeb.Domain
         internal DbSet<GasStation> GasStations { get; private set; }
         internal DbSet<PriceSubmission> PriceSubmissions { get; private set; }
         internal DbSet<Franchise> Franchises { get; private set; }
+        internal DbSet<Scheduler> Schedulers { get; private set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -49,6 +51,11 @@ namespace GasWeb.Domain
             modelBuilder.Entity<FranchiseWholesalePrice>(b =>
             {
                 b.HasKey(x => new { x.FranchiseId, x.FuelType });
+            });
+
+            modelBuilder.AuditEntity<Scheduler>(b =>
+            {
+                b.HasOne<Franchise>().WithMany().HasForeignKey(x => x.FranchiseId);
             });
         }
     }
