@@ -114,19 +114,27 @@ else
     private void SchedulePageRefresh()
     {
         timer?.Dispose();
-        timer = new Timer(_ =>
+
+        if (schedulerNextTrigger.Any(x => x.Value != null))
+        {
+            timer = new Timer(_ =>
             {
                 schedulerNextTrigger = schedulers.ToDictionary(x => x.Id, CalculateNextTrigger);
                 StateHasChanged();
                 var dueTime = GetTimerDueTime();
                 timer.Change(dueTime, dueTime);
             },
-            null,
-            GetTimerDueTime(),
-            GetTimerDueTime());
+                null,
+                GetTimerDueTime(),
+                GetTimerDueTime());
+        }
+        else
+        {
+            timer = null;
+        }
     }
 
-    private TimeSpan GetTimerDueTime() => 
+    private TimeSpan GetTimerDueTime() =>
         schedulerNextTrigger.Where(x => x.Value != null).Min(x => x.Value.Value) - DateTime.UtcNow + TimeSpan.FromSeconds(1);
 
     public void Dispose()
