@@ -6,7 +6,8 @@ namespace GasWeb.Shared.GasStations
     {
         public long Id { get; set; }
         public string Name { get; set; }
-        public Location Location { get; set; }
+        public string AddressLine1 { get; set; }
+        public string AddressLine2 { get; set; }
         public long CreatedByUserId { get; set; }
         public long LastModifiedByUserId { get; set; }
         public DateTime LastModifiedAt { get; set; }

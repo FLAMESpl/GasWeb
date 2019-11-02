@@ -1,5 +1,7 @@
 ﻿@page "/schedulers"
 @using GasWeb.Shared.Schedulers
+@using System.Threading;
+@implements IDisposable
 @inject GasWebClient Client
 @inject NavigationManager NavigationManager
 
@@ -10,20 +12,27 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Franczyzna</th>
+                <th>Zadanie</th>
                 <th>Ostatnia modyfikacja</th>
                 <th>Uruchomiony</th>
                 <th>Następne uruchomienie</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
             @foreach (var scheduler in schedulers)
             {
                 <tr>
-                    <td>@franchiseNames[scheduler.FranchiseId]</td>
+                    <td>@GetSchedulerDescription(scheduler)</td>
                     <td>@scheduler.LastModifiedAt (@userNames[scheduler.LastModifiedByUserId])</td>
                     <td>@(scheduler.StartedAt != null)</td>
-                    <td>@CalculateNextTrigger(scheduler)</td>
+                    <td>@schedulerNextTrigger[scheduler.Id]</td>
+                    <td>
+                        <div>
+                            <button type="submit" class="btn btn-primary" @onclick="() => HandleStartStop(scheduler)">@(scheduler.StartedAt == null ? "Start" : "Stop")</button>
+                            <button type="submit" class="btn btn-primary" @onclick="() => HandleTrigger(scheduler.Id)">Uruchom ręcznie</button>
+                        </div>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -36,9 +45,11 @@ else
 
 @code {
     IReadOnlyCollection<Scheduler> schedulers;
+    Dictionary<long, DateTime?> schedulerNextTrigger;
     Dictionary<long, string> userNames;
     Dictionary<long, string> franchiseNames;
     bool initialized = false;
+    Timer timer;
 
     protected override async Task OnInitializedAsync()
     {
@@ -51,17 +62,75 @@ else
         schedulers = schedulersTask.Result;
         userNames = usersTask.Result.ToDictionary(x => x.Id, x => x.Name);
         franchiseNames = franchisesTask.Result.ToDictionary(x => x.Id, x => x.Name);
+        schedulerNextTrigger = schedulers.ToDictionary(x => x.Id, CalculateNextTrigger);
+
+        SchedulePageRefresh();
 
         initialized = true;
     }
 
-    private string CalculateNextTrigger(Scheduler scheduler)
+    private DateTime? CalculateNextTrigger(Scheduler scheduler)
     {
-        if (scheduler.StartedAt == null) return String.Empty;
+        if (scheduler.StartedAt == null) return null;
 
         var durationFromStart = DateTime.UtcNow - scheduler.StartedAt.Value;
         var triggerCount = durationFromStart.Ticks / scheduler.Interval.Ticks;
         var nextTrigger = scheduler.StartedAt.Value + TimeSpan.FromTicks((triggerCount + 1) * scheduler.Interval.Ticks);
-        return nextTrigger.ToString();
+        return nextTrigger;
+    }
+
+    private async Task HandleStartStop(Scheduler scheduler)
+    {
+        var updateModel = new UpdateSchedulerModel
+        {
+            Interval = scheduler.Interval,
+            Running = scheduler.StartedAt == null
+        };
+
+        await Client.Schedulers.Update(scheduler.Id, updateModel);
+        var updated = await Client.Schedulers.Get(scheduler.Id);
+        scheduler.StartedAt = updated.StartedAt;
+        schedulerNextTrigger[scheduler.Id] = CalculateNextTrigger(scheduler);
+
+        SchedulePageRefresh();
+    }
+
+    private Task HandleTrigger(long id)
+    {
+        return Client.Schedulers.TriggerManually(id);
+    }
+
+    private string GetSchedulerDescription(Scheduler scheduler)
+    {
+        var franchiseName = franchiseNames[scheduler.FranchiseId];
+        switch (scheduler.Type)
+        {
+            case SchedulerType.RefreshWholesalePrices: return $"Odśwież hurtowe ceny ({ franchiseName })";
+            case SchedulerType.RefreshGasStations: return $"Odśwież listę stacji paliwowych ({ franchiseName })";
+            default: return string.Empty;
+        }
+    }
+
+    private void SchedulePageRefresh()
+    {
+        timer?.Dispose();
+        timer = new Timer(_ =>
+            {
+                schedulerNextTrigger = schedulers.ToDictionary(x => x.Id, CalculateNextTrigger);
+                StateHasChanged();
+                var dueTime = GetTimerDueTime();
+                timer.Change(dueTime, dueTime);
+            },
+            null,
+            GetTimerDueTime(),
+            GetTimerDueTime());
+    }
+
+    private TimeSpan GetTimerDueTime() => 
+        schedulerNextTrigger.Where(x => x.Value != null).Min(x => x.Value.Value) - DateTime.UtcNow + TimeSpan.FromSeconds(1);
+
+    public void Dispose()
+    {
+        timer?.Dispose();
     }
 }

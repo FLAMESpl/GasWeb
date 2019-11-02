@@ -67,15 +67,15 @@ namespace GasWeb.Domain.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("AddressLine1");
+
+                    b.Property<string>("AddressLine2");
+
                     b.Property<long>("CreatedByUserId");
 
                     b.Property<long?>("FranchiseId");
 
                     b.Property<DateTime>("LastModified");
-
-                    b.Property<double>("Latitude");
-
-                    b.Property<double>("Longitude");
 
                     b.Property<bool>("MaintainedBySystem");
 
@@ -128,8 +128,7 @@ namespace GasWeb.Domain.Migrations
 
             modelBuilder.Entity("GasWeb.Domain.Schedulers.Entities.Scheduler", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<long>("Id");
 
                     b.Property<long>("CreatedByUserId");
 
@@ -139,9 +138,13 @@ namespace GasWeb.Domain.Migrations
 
                     b.Property<DateTime>("LastModified");
 
+                    b.Property<DateTime?>("LastRun");
+
                     b.Property<long>("ModifiedByUserId");
 
                     b.Property<DateTime?>("StartedAt");
+
+                    b.Property<int>("Type");
 
                     b.HasKey("Id");
 

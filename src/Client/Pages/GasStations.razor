@@ -42,15 +42,15 @@ else
                 </div>
 
                 <div class="form-group form-horizontal">
-                    <label for="longitude">Długość geograficzna</label>
-                    <InputNumber Id="longitude" Class="form-control" @bind-Value="@addGasStationViewModel.Location.Longitude" />
-                    <ValidationMessage For="@(() => addGasStationViewModel.Location.Longitude)" />
+                    <label for="address1">Adres 1</label>
+                    <InputText Id="address1" Class="form-control" @bind-Value="@addGasStationViewModel.AddressLine1" />
+                    <ValidationMessage For="@(() => addGasStationViewModel.AddressLine1)" />
                 </div>
 
                 <div class="form-group form-horizontal">
-                    <label for="latitude">Szerokość geograficzna</label>
-                    <InputNumber Id="latitude" Class="form-control" @bind-Value="@addGasStationViewModel.Location.Latitude" />
-                    <ValidationMessage For="@(() => addGasStationViewModel.Location.Latitude)" />
+                    <label for="address2">Adres 2</label>
+                    <InputText Id="address2" Class="form-control" @bind-Value="@addGasStationViewModel.AddressLine1" />
+                    <ValidationMessage For="@(() => addGasStationViewModel.AddressLine2)" />
                 </div>
 
                 <div class="form-group form-horizontal">
@@ -85,7 +85,13 @@ else
                     <td>@gasStation.Id</td>
                     <td>@gasStation.Name</td>
                     <td>@(gasStation.FranchiseId.HasValue ? franchiseNames[gasStation.FranchiseId.Value] : "")</td>
-                    <td>@gasStation.Location</td>
+                    <td>
+                        <div>
+                            @gasStation.AddressLine1
+                            &emsp;
+                            @gasStation.AddressLine2
+                        </div>
+                    </td>
                     <td>@userNames[gasStation.CreatedByUserId]</td>
                     <td>@gasStation.LastModifiedAt</td>
                 </tr>
@@ -110,7 +116,7 @@ else
     Dictionary<long, string> userNames;
     Dictionary<long, string> franchiseNames;
     bool expandEditForm = false;
-    AddGasStationViewModel addGasStationViewModel = new AddGasStationViewModel { Location = new Location() };
+    AddGasStationViewModel addGasStationViewModel = new AddGasStationViewModel();
 
     protected override async Task OnInitializedAsync()
     {
@@ -135,7 +141,7 @@ else
         gasStations = null;
         expandEditForm = false;
         await Client.GasStations.Create(addGasStationViewModel.ToModel(franchiseNames));
-        addGasStationViewModel = new AddGasStationViewModel { Location = new Location() };
+        addGasStationViewModel = new AddGasStationViewModel();
         await OnInitializedAsync();
     }
 }

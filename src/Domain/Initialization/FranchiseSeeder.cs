@@ -20,18 +20,21 @@ namespace GasWeb.Domain.Initialization
         private readonly GasWebDbContext dbContext;
         private readonly SystemFranchiseCollectionFactory franchiseCollectionFactory;
         private readonly ILogger<FranchiseSeeder> logger;
+        private readonly IAuditMetadataProvider auditMetadataProvider;
 
         public FranchiseSeeder(
             GasWebDbContext dbContext, 
             SystemFranchiseCollectionFactory franchiseCollectionFactory,
-            ILogger<FranchiseSeeder> logger)
+            ILogger<FranchiseSeeder> logger,
+            IAuditMetadataProvider auditMetadataProvider)
         {
             this.dbContext = dbContext;
             this.franchiseCollectionFactory = franchiseCollectionFactory;
             this.logger = logger;
+            this.auditMetadataProvider = auditMetadataProvider;
         }
 
-        internal async Task SeedKnownFranchises(IAuditMetadataProvider auditMetadataProvider)
+        internal async Task SeedKnownFranchises()
         {
             if (franchiseCollectionFactory.Initialized) return;
 

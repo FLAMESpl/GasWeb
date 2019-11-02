@@ -5,36 +5,26 @@ namespace GasWeb.Domain.GasStations.Entities
 {
     internal class GasStation : AuditEntity
     {
-        public GasStation(string name, double latitude, double longitude, long? franchiseId, bool maintainedBySystem)
+        public GasStation(string name, string addressLine1, string addressLine2, long? franchiseId, bool maintainedBySystem)
         {
             Name = name;
-            Latitude = latitude;
-            Longitude = longitude;
-            FranchiseId = franchiseId;
-            MaintainedBySystem = maintainedBySystem;
-        }
-
-        public GasStation(string name, long id, double latitude, double longitude, long createdByUserId, long modifiedByUserId, DateTime lastModified, long? franchiseId, bool maintainedBySystem)
-            : base(id, createdByUserId, modifiedByUserId, lastModified)
-        {
-            Name = name;
-            Latitude = latitude;
-            Longitude = longitude;
+            AddressLine1 = addressLine1;
+            AddressLine2 = addressLine2;
             FranchiseId = franchiseId;
             MaintainedBySystem = maintainedBySystem;
         }
 
         public string Name { get; private set; }
-        public double Latitude { get; private set; }
-        public double Longitude { get; private set; }
+        public string AddressLine1 { get; private set; }
+        public string AddressLine2 { get; private set; }
         public long? FranchiseId { get; private set; }
         public bool MaintainedBySystem { get; private set; }
 
         internal void Update(UpdateGasStationModel model)
         {
             Name = model.Name ?? Name;
-            Latitude = model.Location?.Latitude ?? Latitude;
-            Longitude = model.Location?.Longitude ?? Longitude;
+            AddressLine1 = model.AddressLine1 ?? AddressLine1;
+            AddressLine2 = model.AddressLine2 ?? AddressLine2;
         }
     }
 }

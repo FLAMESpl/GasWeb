@@ -1,5 +1,7 @@
 using GasWeb.Domain;
+using GasWeb.Server.Schedulers;
 using GasWeb.Server.Settings;
+using GasWeb.Server.Users;
 using GasWeb.Server.Validation;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -12,7 +14,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System.Linq;
-using System.Net.Http;
 
 namespace GasWeb.Server
 {
@@ -37,6 +38,7 @@ namespace GasWeb.Server
             services.AddScoped(sp => sp.GetRequiredService<HttpClientProvider>().Get());
 
             services.AddHostedService<InitializationHostedService>();
+            services.AddHostedService<SchedulersHostedService>();
 
             services.AddMvc(options =>
             {
@@ -107,6 +109,7 @@ namespace GasWeb.Server
             app.UseClientSideBlazorFiles<Client.Startup>();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseMiddleware<UserContextMiddleware>();
             app.UseRouting();
             app.UseMvc();
 

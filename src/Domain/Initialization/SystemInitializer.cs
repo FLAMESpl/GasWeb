@@ -5,6 +5,7 @@ namespace GasWeb.Domain.Initialization
 {
     public interface ISystemInitializer
     {
+        Task<long> InitalizeSystemUserAsync();
         Task InitialzieAsync();
     }
 
@@ -27,14 +28,17 @@ namespace GasWeb.Domain.Initialization
             this.logger = logger;
         }
 
+        public Task<long> InitalizeSystemUserAsync()
+        {
+            return systemUserSeeder.SeedSystemUser();
+        }
+
         public async Task InitialzieAsync()
         {
             logger.LogInitializationProcess("Start");
 
-            var systemUserId = await systemUserSeeder.SeedSystemUser();
-            var metadataProvider = new SystemUserMetadataProvider(systemUserId);
-            await franchiseSeeder.SeedKnownFranchises(metadataProvider);
-            await schedulerSeeder.SeedSchedulers(metadataProvider);
+            await franchiseSeeder.SeedKnownFranchises();
+            await schedulerSeeder.SeedSchedulers();
 
             logger.LogInitializationProcess("End");
         }

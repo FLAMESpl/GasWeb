@@ -16,9 +16,9 @@ namespace GasWeb.Domain.GasStations
     internal class GasStationService : IGasStationService
     {
         private readonly GasWebDbContext dbContext;
-        private readonly UserContextAuditMetadataProvider auditMetadataProvider;
+        private readonly IAuditMetadataProvider auditMetadataProvider;
 
-        public GasStationService(GasWebDbContext dbContext, UserContextAuditMetadataProvider auditMetadataProvider)
+        public GasStationService(GasWebDbContext dbContext, IAuditMetadataProvider auditMetadataProvider)
         {
             this.dbContext = dbContext;
             this.auditMetadataProvider = auditMetadataProvider;
@@ -28,8 +28,8 @@ namespace GasWeb.Domain.GasStations
         {
             var gasStation = new Entities.GasStation(
                 name: model.Name,
-                latitude: model.Location.Latitude, 
-                longitude: model.Location.Longitude,
+                addressLine1: model.AddressLine1, 
+                addressLine2: model.AddressLine2,
                 franchiseId: model.FranchiseId,
                 maintainedBySystem: false);
 

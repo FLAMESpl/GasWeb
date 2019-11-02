@@ -55,6 +55,7 @@ namespace GasWeb.Domain
 
             modelBuilder.AuditEntity<Scheduler>(b =>
             {
+                b.Property(x => x.Id).ValueGeneratedNever();
                 b.HasOne<Franchise>().WithMany().HasForeignKey(x => x.FranchiseId);
             });
         }

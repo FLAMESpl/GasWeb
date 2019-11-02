@@ -12,7 +12,10 @@
     {
         <p>@franchise.Name</p>
     }
-    <p>@gasStation.Location</p>
+    <p>
+        @gasStation.AddressLine1
+        @gasStation.AddressLine2
+    </p>
     <p>Utworzono przez @userNames[gasStation.CreatedByUserId]</p>
     <p>Ostation modyfikowano @priceSubmissions.Select(x => x.ModifiedAt).Append(gasStation.LastModifiedAt).Max()</p>
 
@@ -71,12 +74,12 @@
         </EditForm>
 
         <table class="table">
-            <thead class="zz">
+            <thead>
                 <tr>
                     <th>Id</th>
                     <th>Rodzaj paliwa</th>
-                    <th style="vertical-align:top">Cena</th>
-                    <th class="zz">Utworzono przez</th>
+                    <th>Cena</th>
+                    <th>Utworzono przez</th>
                     <th>Data dodania</th>
                 </tr>
                 <tr>
@@ -124,10 +127,6 @@
 
     .form-horizontal *.form-group {
         margin: 4px
-    }
-
-    .zz {
-        vertical-align: top;
     }
 
 </style>

@@ -84,8 +84,8 @@ namespace GasWeb.Domain.Migrations
                     ModifiedByUserId = table.Column<long>(nullable: false),
                     LastModified = table.Column<DateTime>(nullable: false),
                     Name = table.Column<string>(nullable: false),
-                    Latitude = table.Column<double>(nullable: false),
-                    Longitude = table.Column<double>(nullable: false),
+                    AddressLine1 = table.Column<string>(nullable: true),
+                    AddressLine2 = table.Column<string>(nullable: true),
                     FranchiseId = table.Column<long>(nullable: true),
                     MaintainedBySystem = table.Column<bool>(nullable: false)
                 },
@@ -106,6 +106,43 @@ namespace GasWeb.Domain.Migrations
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_GasStations_Users_ModifiedByUserId",
+                        column: x => x.ModifiedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Schedulers",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false),
+                    CreatedByUserId = table.Column<long>(nullable: false),
+                    ModifiedByUserId = table.Column<long>(nullable: false),
+                    LastModified = table.Column<DateTime>(nullable: false),
+                    Type = table.Column<int>(nullable: false),
+                    FranchiseId = table.Column<long>(nullable: false),
+                    Interval = table.Column<TimeSpan>(nullable: false),
+                    StartedAt = table.Column<DateTime>(nullable: true),
+                    LastRun = table.Column<DateTime>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Schedulers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Schedulers_Users_CreatedByUserId",
+                        column: x => x.CreatedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Schedulers_Franchises_FranchiseId",
+                        column: x => x.FranchiseId,
+                        principalTable: "Franchises",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Schedulers_Users_ModifiedByUserId",
                         column: x => x.ModifiedByUserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -196,6 +233,21 @@ namespace GasWeb.Domain.Migrations
                 column: "ModifiedByUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Schedulers_CreatedByUserId",
+                table: "Schedulers",
+                column: "CreatedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Schedulers_FranchiseId",
+                table: "Schedulers",
+                column: "FranchiseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Schedulers_ModifiedByUserId",
+                table: "Schedulers",
+                column: "ModifiedByUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_NameId_AuthenticationSchema",
                 table: "Users",
                 columns: new[] { "NameId", "AuthenticationSchema" },
@@ -209,6 +261,9 @@ namespace GasWeb.Domain.Migrations
 
             migrationBuilder.DropTable(
                 name: "PriceSubmissions");
+
+            migrationBuilder.DropTable(
+                name: "Schedulers");
 
             migrationBuilder.DropTable(
                 name: "GasStations");

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using GasWeb.Shared.GasStations;
+using HtmlAgilityPack;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -16,11 +18,26 @@ namespace GasWeb.Domain.GasStations.Lotos
             this.httpClient = httpClient;
         }
 
-        public async Task<IReadOnlyList<string>> GetLotosGasStations()
+        public async Task<IReadOnlyList<AddGasStationModel>> GetLotosGasStations()
         {
             var htmlDocument = await httpClient.GetHtmlDocument(LotosGasStationsWebPageUrl);
-            var nodes = htmlDocument.GetElementbyId("stations-list").SelectNodes("tbody/tr/td[1]/h6/a");
-            return nodes.Select(x => x.InnerText).ToList();
+            var rows = htmlDocument.GetElementbyId("stations-list").SelectNodes("tbody/tr/td[1]");
+            var stations = rows.Select(GetAddModel).ToList();
+            return stations;
+        }
+
+        private static AddGasStationModel GetAddModel(HtmlNode gasStationHtml)
+        {
+            var name = gasStationHtml.SelectSingleNode("h6/a").InnerText.Trim();
+            var addressLine1 = gasStationHtml.SelectSingleNode("div/text()[1]").InnerText.Trim();
+            var addressLine2 = gasStationHtml.SelectSingleNode("div/text()[2]").InnerText.Trim();
+
+            return new AddGasStationModel
+            {
+                AddressLine1 = addressLine1,
+                AddressLine2 = addressLine2,
+                Name = name
+            };
         }
     }
 }

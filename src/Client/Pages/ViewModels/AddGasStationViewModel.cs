@@ -11,16 +11,18 @@ namespace GasWeb.Client.Pages.ViewModels
         [Required]
         public string Name { get; set; }
 
-        [Required]
-        public Location Location { get; set; }
-
         public string Franchise { get; set; }
+
+        public string AddressLine1 { get; set; }
+
+        public string AddressLine2 { get; set; }
 
         public AddGasStationModel ToModel(IReadOnlyDictionary<long, string> dict) =>
             new AddGasStationModel
             {
                 FranchiseId = string.IsNullOrEmpty(Franchise) ? default(long?) : dict.Single(x => x.Value == Franchise).Key,
-                Location = Location,
+                AddressLine1 = AddressLine1,
+                AddressLine2 = AddressLine2,
                 Name = Name
             };
     }

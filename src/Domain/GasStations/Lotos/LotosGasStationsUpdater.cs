@@ -17,13 +17,13 @@ namespace GasWeb.Domain.GasStations.Lotos
         private readonly LotosGasStationsFetcher gasStationsFetcher;
         private readonly SystemFranchiseCollection franchiseCollection;
         private readonly GasWebDbContext dbContext;
-        private readonly UserContextAuditMetadataProvider auditMetadataProvider;
+        private readonly IAuditMetadataProvider auditMetadataProvider;
 
         public LotosGasStationsUpdater(
             LotosGasStationsFetcher gasStationsFetcher,
             SystemFranchiseCollection franchiseCollection,
             GasWebDbContext dbContext,
-            UserContextAuditMetadataProvider auditMetadataProvider)
+            IAuditMetadataProvider auditMetadataProvider)
         {
             this.gasStationsFetcher = gasStationsFetcher;
             this.franchiseCollection = franchiseCollection;
@@ -33,8 +33,8 @@ namespace GasWeb.Domain.GasStations.Lotos
 
         public async Task UpdateGasStations()
         {
-            var gasStationNames = await gasStationsFetcher.GetLotosGasStations();
-            var gasStationsQueryValues = string.Join(",", gasStationNames.Select((name, n) => $"({n}, '{name}')"));
+            var gasStations = await gasStationsFetcher.GetLotosGasStations();
+            var gasStationsQueryValues = string.Join(",", gasStations.Select((x, n) => $"({n}, '{x.Name}')"));
 
             var missingGasStations = await dbContext.Database.GetDbConnection().QueryAsync<int>($@"
                 SELECT n FROM (VALUES { gasStationsQueryValues }) as request (n, name)
@@ -45,10 +45,11 @@ namespace GasWeb.Domain.GasStations.Lotos
 
             foreach (var index in missingGasStations)
             {
+                var missingGasStation = gasStations[index];
                 var gasStation = new GasStation(
-                    name: gasStationNames[index],
-                    latitude: 0,
-                    longitude: 0,
+                    name: missingGasStation.Name,
+                    addressLine1: missingGasStation.AddressLine1,
+                    addressLine2: missingGasStation.AddressLine2,
                     franchiseId: franchiseCollection.Lotos,
                     maintainedBySystem: true);
 

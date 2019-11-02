@@ -8,6 +8,7 @@ namespace GasWeb.Domain.Schedulers
             new Scheduler
             {
                 FranchiseId = scheduler.FranchiseId,
+                Type = scheduler.Type,
                 Id = scheduler.Id,
                 Interval = scheduler.Interval,
                 StartedAt = scheduler.StartedAt,

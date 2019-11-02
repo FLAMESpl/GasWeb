@@ -29,9 +29,16 @@ namespace GasWeb.Server.Schedulers
         }
 
         [HttpPut("{id:long}")]
-        public async Task<IActionResult> Update(long id, UpdateSchedulerModel model)
+        public async Task<IActionResult> Update(long id, [FromBody] UpdateSchedulerModel model)
         {
             await service.Update(id, model);
+            return NoContent();
+        }
+
+        [HttpPost("{id:long}/trigger")]
+        public async Task<IActionResult> Trigger(long id)
+        {
+            await service.Trigger(id);
             return NoContent();
         }
     }

@@ -17,9 +17,9 @@ namespace GasWeb.Domain.PriceSubmissions
     internal class PriceSubmissionsService : IPriceSubmissionsService
     {
         private readonly GasWebDbContext dbContext;
-        private readonly UserContextAuditMetadataProvider auditMetadataProvider;
+        private readonly IAuditMetadataProvider auditMetadataProvider;
 
-        public PriceSubmissionsService(GasWebDbContext dbContext, UserContextAuditMetadataProvider auditMetadataProvider)
+        public PriceSubmissionsService(GasWebDbContext dbContext, IAuditMetadataProvider auditMetadataProvider)
         {
             this.dbContext = dbContext;
             this.auditMetadataProvider = auditMetadataProvider;

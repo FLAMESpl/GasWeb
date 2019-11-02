@@ -10,11 +10,8 @@ namespace GasWeb.Domain.GasStations
             {
                 Id = domain.Id,
                 Name = domain.Name,
-                Location = new Location
-                {
-                    Longitude = domain.Longitude,
-                    Latitude = domain.Latitude
-                },
+                AddressLine1 = domain.AddressLine1,
+                AddressLine2 = domain.AddressLine2,
                 CreatedByUserId = domain.CreatedByUserId,
                 LastModifiedByUserId = domain.ModifiedByUserId,
                 LastModifiedAt = domain.LastModified,

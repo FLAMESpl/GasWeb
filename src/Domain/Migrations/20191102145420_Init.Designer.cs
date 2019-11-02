@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GasWeb.Domain.Migrations
 {
     [DbContext(typeof(GasWebDbContext))]
-    [Migration("20191027192422_Init")]
+    [Migration("20191102145420_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -69,15 +69,15 @@ namespace GasWeb.Domain.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("AddressLine1");
+
+                    b.Property<string>("AddressLine2");
+
                     b.Property<long>("CreatedByUserId");
 
                     b.Property<long?>("FranchiseId");
 
                     b.Property<DateTime>("LastModified");
-
-                    b.Property<double>("Latitude");
-
-                    b.Property<double>("Longitude");
 
                     b.Property<bool>("MaintainedBySystem");
 
@@ -126,6 +126,37 @@ namespace GasWeb.Domain.Migrations
                     b.HasIndex("ModifiedByUserId");
 
                     b.ToTable("PriceSubmissions");
+                });
+
+            modelBuilder.Entity("GasWeb.Domain.Schedulers.Entities.Scheduler", b =>
+                {
+                    b.Property<long>("Id");
+
+                    b.Property<long>("CreatedByUserId");
+
+                    b.Property<long>("FranchiseId");
+
+                    b.Property<TimeSpan>("Interval");
+
+                    b.Property<DateTime>("LastModified");
+
+                    b.Property<DateTime?>("LastRun");
+
+                    b.Property<long>("ModifiedByUserId");
+
+                    b.Property<DateTime?>("StartedAt");
+
+                    b.Property<int>("Type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("FranchiseId");
+
+                    b.HasIndex("ModifiedByUserId");
+
+                    b.ToTable("Schedulers");
                 });
 
             modelBuilder.Entity("GasWeb.Domain.Users.Entities.User", b =>
@@ -199,6 +230,24 @@ namespace GasWeb.Domain.Migrations
                     b.HasOne("GasWeb.Domain.GasStations.Entities.GasStation")
                         .WithMany()
                         .HasForeignKey("GasStationId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("GasWeb.Domain.Users.Entities.User")
+                        .WithMany()
+                        .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("GasWeb.Domain.Schedulers.Entities.Scheduler", b =>
+                {
+                    b.HasOne("GasWeb.Domain.Users.Entities.User")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("GasWeb.Domain.Franchises.Entities.Franchise")
+                        .WithMany()
+                        .HasForeignKey("FranchiseId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("GasWeb.Domain.Users.Entities.User")

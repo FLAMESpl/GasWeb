@@ -10,7 +10,7 @@ namespace GasWeb.Client.WebApiClient
 {
     public class Endpoint
     {
-        private readonly HttpClient httpClient;
+        protected readonly HttpClient httpClient;
 
         public Endpoint(HttpClient httpClient, string route)
         {
@@ -27,7 +27,7 @@ namespace GasWeb.Client.WebApiClient
 
         public Task Update(long id, object model)
         {
-            return httpClient.PutJsonAsync($"{Route}/{id}", model);
+            return httpClient.SendJsonAsync(HttpMethod.Put, $"{Route}/{id}", model);
         }
 
         public Task Delete(long id)
@@ -37,7 +37,7 @@ namespace GasWeb.Client.WebApiClient
 
         public Task<T> Get<T>(long id)
         {
-            return httpClient.GetJsonAsync<T>($"{Route}/{id}");
+            return httpClient.Get<T>($"{Route}/{id}");
         }
 
         public Task<IReadOnlyCollection<T>> GetList<T>(object queryParameters = null)

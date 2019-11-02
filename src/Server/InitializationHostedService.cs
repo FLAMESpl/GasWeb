@@ -1,4 +1,6 @@
-﻿using GasWeb.Domain.Initialization;
+﻿using GasWeb.Domain;
+using GasWeb.Domain.Initialization;
+using GasWeb.Server.Users;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Threading;
@@ -20,6 +22,8 @@ namespace GasWeb.Server
             using (var scope = scopeFactory.CreateScope())
             {
                 var systemInitializer = scope.ServiceProvider.GetRequiredService<ISystemInitializer>();
+                var userContext = scope.ServiceProvider.GetRequiredService<UserContext>();
+                userContext.Id = await systemInitializer.InitalizeSystemUserAsync();
                 await systemInitializer.InitialzieAsync();
             }
         }

@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace GasWeb.Client.WebApiClient
@@ -27,6 +28,17 @@ namespace GasWeb.Client.WebApiClient
             var response = await httpClient.GetAsync(requestUrl);
             response.EnsureSuccessStatusCode();
             return await response.Content<T>();
+        }
+
+        public static Task SendJsonAsync(this HttpClient httpClient, HttpMethod method, string url, object content)
+        {
+            var json = JsonConvert.SerializeObject(content);
+            var stringContent = new StringContent(json, Encoding.UTF8, "application/json");
+            var request = new HttpRequestMessage(method, url)
+            {
+                Content = stringContent
+            };
+            return httpClient.SendAsync(request);
         }
 
         private static string GetQueryStringParameters(RouteValueDictionary parameters)

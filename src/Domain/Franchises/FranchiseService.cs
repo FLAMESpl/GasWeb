@@ -17,9 +17,9 @@ namespace GasWeb.Domain.Franchises
     internal class FranchiseService : IFranchiseService
     {
         private readonly GasWebDbContext dbContext;
-        private readonly UserContextAuditMetadataProvider auditMetadataProvider;
+        private readonly IAuditMetadataProvider auditMetadataProvider;
 
-        public FranchiseService(GasWebDbContext dbContext, UserContextAuditMetadataProvider auditMetadataProvider)
+        public FranchiseService(GasWebDbContext dbContext, IAuditMetadataProvider auditMetadataProvider)
         {
             this.dbContext = dbContext;
             this.auditMetadataProvider = auditMetadataProvider;

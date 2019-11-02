@@ -24,8 +24,11 @@ namespace GasWeb.Domain
             services.AddScoped<IPriceSubmissionsService, PriceSubmissionsService>();
             services.AddScoped<IFranchiseService, FranchiseService>();
             services.AddScoped<ISchedulerService, SchedulerService>();
+            services.AddSingleton<IScheduledExecutor, ScheduledExecutor>();
             services.AddScoped(sp => sp.GetRequiredService<SystemFranchiseCollectionFactory>().Create());
-            services.AddScoped<UserContextAuditMetadataProvider>();
+            services.AddScoped<IAuditMetadataProvider, UserContextAuditMetadataProvider>();
+            services.AddScoped<SchedulerTaskDispatcher>();
+            services.AddScoped<UserContext>();
             services.RegisterInitializationComponents();
 
             AddLotosComponents(services);

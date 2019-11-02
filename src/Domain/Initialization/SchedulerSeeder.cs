@@ -1,9 +1,10 @@
 ﻿using GasWeb.Domain.Franchises;
-using GasWeb.Domain.Franchises.Entities;
+using GasWeb.Domain.Schedulers;
 using GasWeb.Domain.Schedulers.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,60 +15,72 @@ namespace GasWeb.Domain.Initialization
         private readonly ILogger<SchedulerSeeder> logger;
         private readonly GasWebDbContext dbContext;
         private readonly Func<SystemFranchiseCollection> franchiseCollectionFactory;
+        private readonly IAuditMetadataProvider auditMetadataProvider;
+        private static readonly IReadOnlyCollection<long> AllSchedulers = new[]
+        {
+            SchedulersCollection.RefreshPricesLotos,
+            SchedulersCollection.RefreshPricesOrlen,
+            SchedulersCollection.RefreshPricesBp,
+            SchedulersCollection.RefreshGasStationsLotos
+        };
 
         public SchedulerSeeder(
             ILogger<SchedulerSeeder> logger,
             GasWebDbContext dbContext,
-            Func<SystemFranchiseCollection> franchiseCollectionFactory)
+            Func<SystemFranchiseCollection> franchiseCollectionFactory,
+            IAuditMetadataProvider auditMetadataProvider)
         {
             this.logger = logger;
             this.dbContext = dbContext;
             this.franchiseCollectionFactory = franchiseCollectionFactory;
+            this.auditMetadataProvider = auditMetadataProvider;
         }
 
-        public async Task SeedSchedulers(IAuditMetadataProvider auditMetadataProvider)
+        public async Task SeedSchedulers()
         {
             var franchiseCollection = franchiseCollectionFactory();
-            var alreadySeededFranchises = await dbContext.Schedulers.AsNoTracking()
-                .Where(x => franchiseCollection.Contains(x.FranchiseId)).Select(x => x.FranchiseId).ToListAsync();
+            var existingSchedulers = await dbContext.Schedulers.AsNoTracking().Select(x => x.Id).ToListAsync();
+            var missingSchedulers = AllSchedulers.Except(existingSchedulers).ToList();
 
-            var franchisesToSeed = franchiseCollection.Except(alreadySeededFranchises).ToList();
-
-            if (franchisesToSeed.Any())
+            if (missingSchedulers.Any())
             {
-                logger.LogInitializationProcess("Seeding schedulers.");
+                logger.LogInitializationProcess($"Seeding schedulers: { string.Join(",", missingSchedulers) }.");
 
-                var franchises = await dbContext.Franchises.AsNoTracking().Where(x => franchisesToSeed.Contains(x.Id)).ToListAsync();
-                var lotos = franchises.SingleOrDefault(x => x.Id == franchiseCollection.Lotos && !alreadySeededFranchises.Contains(x.Id));
-                var orlen = franchises.SingleOrDefault(x => x.Id == franchiseCollection.Orlen);
-                var bp = franchises.SingleOrDefault(x => x.Id == franchiseCollection.Bp);
+                foreach (var schedulerId in missingSchedulers)
+                {
+                    var scheduler = schedulerId switch
+                    {
+                        0 => CreateForWholesalePrices(schedulerId, franchiseCollection.Lotos),
+                        1 => CreateForWholesalePrices(schedulerId, franchiseCollection.Orlen),
+                        2 => CreateForWholesalePrices(schedulerId, franchiseCollection.Bp),
+                        3 => CreateForGasStations(schedulerId, franchiseCollection.Lotos),
+                        _ => null
+                    };
 
-                AddSchedulers(auditMetadataProvider, new[] { lotos, orlen, bp });
+                    auditMetadataProvider.AddAuditMetadataToNewEntity(scheduler);
+                    dbContext.Add(scheduler);
+                }
 
                 await dbContext.SaveChangesAsync();
             }
         }
 
-        private void AddSchedulers(IAuditMetadataProvider auditMetadataProvider, Franchise[] franchises)
-        {
-            var startedAt = DateTime.UtcNow;
-            var franchisesToAdd = franchises.Where(x => x != null).ToList();
-            var schedulers = franchisesToAdd
-                .Select(franchise =>
-                {
-                    var scheduler = new Scheduler(
-                        franchiseId: franchise.Id,
-                        interval: TimeSpan.FromDays(1),
-                        startedAt: startedAt);
+        private Scheduler CreateForWholesalePrices(long id, long franchiseId) =>
+            new Scheduler(
+                id: id,
+                type: Shared.Schedulers.SchedulerType.RefreshWholesalePrices,
+                franchiseId: franchiseId,
+                interval: TimeSpan.FromSeconds(15),
+                startedAt: DateTime.UtcNow,
+                lastRun: null);
 
-                    auditMetadataProvider.AddAuditMetadataToNewEntity(scheduler);
-                    return scheduler;
-                })
-                .ToList();
-
-            dbContext.AddRange(schedulers);
-
-            logger.LogInitializationProcess($"Added schedulers for { string.Join(", ", franchisesToAdd.Select(x => x.Name)) }.");
-        }
+        private Scheduler CreateForGasStations(long id, long franchiseId) =>
+            new Scheduler(
+                id: id,
+                type: Shared.Schedulers.SchedulerType.RefreshGasStations,
+                franchiseId: franchiseId,
+                interval: TimeSpan.FromSeconds(30),
+                startedAt: DateTime.UtcNow,
+                lastRun: null);
     }
 }

@@ -16,7 +16,7 @@ namespace GasWeb.Client.WebApiClient
             Franchises = new Endpoint<Franchise>(httpClient, "api/franchises");
             GasStations = new Endpoint<GasStation>(httpClient, "api/gas-stations");
             PriceSubmissions = new Endpoint<PriceSubmission>(httpClient, "api/price-submissions");
-            Schedulers = new Endpoint<Scheduler>(httpClient, "api/schedulers");
+            Schedulers = new SchedulersEndpoint(httpClient, "api/schedulers");
             AuthService = authService;
         }
 
@@ -25,6 +25,6 @@ namespace GasWeb.Client.WebApiClient
         public Endpoint<Franchise> Franchises { get; }
         public Endpoint<GasStation> GasStations { get; }
         public Endpoint<PriceSubmission> PriceSubmissions { get; }
-        public Endpoint<Scheduler> Schedulers { get; }
+        public SchedulersEndpoint Schedulers { get; }
     }
 }

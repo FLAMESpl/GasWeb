@@ -14,7 +14,8 @@ namespace GasWeb.Domain.Initialization
             services.AddScoped(sp => new SchedulerSeeder(
                 logger: sp.GetRequiredService<ILogger<SchedulerSeeder>>(),
                 dbContext: sp.GetRequiredService<GasWebDbContext>(),
-                franchiseCollectionFactory: sp.GetRequiredService<SystemFranchiseCollection>));
+                franchiseCollectionFactory: sp.GetRequiredService<SystemFranchiseCollection>,
+                auditMetadataProvider: sp.GetRequiredService<IAuditMetadataProvider>()));
             services.AddSingleton<SystemFranchiseCollectionFactory>();
         }
     }
