@@ -1,5 +1,6 @@
 ﻿using GasWeb.Shared;
 using System;
+using System.Collections.Generic;
 
 namespace GasWeb.Domain.PriceSubmissions.Entities
 {
@@ -27,5 +28,7 @@ namespace GasWeb.Domain.PriceSubmissions.Entities
         public DateTime SubmissionDate { get; private set; }
         public decimal Amount { get; private set; }
         public FuelType FuelType { get; private set; }
+
+        public ICollection<PriceSubmissionRating> Ratings { get; private set; }
     }
 }

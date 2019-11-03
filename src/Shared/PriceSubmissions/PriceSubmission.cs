@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace GasWeb.Shared.PriceSubmissions
 {
@@ -7,7 +8,8 @@ namespace GasWeb.Shared.PriceSubmissions
         public PriceSubmission() { }
 
         public PriceSubmission(long id, long createdByUserId, DateTime modifiedAt,
-            long gasStationId, decimal amount, FuelType fuelType)
+            long gasStationId, decimal amount, FuelType fuelType,
+            IReadOnlyCollection<PriceSubmissionRating> ratings)
         {
             Id = id;
             CreatedByUserId = createdByUserId;
@@ -15,6 +17,7 @@ namespace GasWeb.Shared.PriceSubmissions
             GasStationId = gasStationId;
             Amount = amount;
             FuelType = fuelType;
+            Ratings = ratings;
         }
 
         public long Id { get; set; }
@@ -23,5 +26,6 @@ namespace GasWeb.Shared.PriceSubmissions
         public long GasStationId { get; set; }
         public decimal Amount { get; set; }
         public FuelType FuelType { get; set; }
+        public IReadOnlyCollection<PriceSubmissionRating> Ratings { get; set; }
     }
 }

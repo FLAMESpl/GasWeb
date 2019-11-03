@@ -46,5 +46,12 @@ namespace GasWeb.Server.PriceSubmissions
             var query = new GetPriceSubmissions(gasStationId, types, createdByUserId, pageNumber, pageSize);
             return priceSubmissionsService.GetList(query);
         }
+
+        [HttpPut("{id:long}/rate")]
+        public async Task<IActionResult> Rate(long id, [FromBody] AddPriceSubmissionRatingModel model)
+        {
+            await priceSubmissionsService.AddRating(id, model);
+            return NoContent();
+        }
     }
 }

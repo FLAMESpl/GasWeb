@@ -89,9 +89,11 @@
                     <th>Cena</th>
                     <th>Utworzono przez</th>
                     <th>Data dodania</th>
+                    <th>Ocena</th>
+                    <th />
                 </tr>
                 <tr>
-                    <th></th>
+                    <th />
                     <th>
                         <select Id="fuelType" @onchange="HandleRefresh" Class="form-control">
                             <option value="@((int)FuelType.All)">Wszystkie</option>
@@ -100,9 +102,11 @@
                             <option value="@((int)FuelType.Gas)">Gaz</option>
                         </select>
                     </th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
+                    <th />
+                    <th />
+                    <th />
+                    <th />
+                    <th />
                 </tr>
             </thead>
             <tbody>
@@ -116,6 +120,13 @@
                             <td>@priceSubmission.Amount.ToDisplayAmount()</td>
                             <td>@userNames[priceSubmission.CreatedByUserId]</td>
                             <td>@priceSubmission.ModifiedAt</td>
+                            <td>@priceSubmission.Ratings?.Sum(x => x.Positive ? 1 : -1) (@priceSubmission.Ratings?.Count)</td>
+                            <td>
+                                <div>
+                                    <button class="btn btn-primary" style="background-color: forestgreen; border-color: forestgreen" type="submit" @onclick="() => HandleRatePriceSubmission(priceSubmission.Id, true)">Plus</button>
+                                    <button class="btn btn-primary" style="background-color: orangered; border-color: orangered" type="submit" @onclick="() => HandleRatePriceSubmission(priceSubmission.Id, false)">Minus</button>
+                                </div>
+                            </td>
                         </tr>
                     }
                 }
@@ -175,8 +186,8 @@
 
         if (aggregated.Successful)
 
-        if (gasStation.FranchiseId.HasValue)
-            franchise = (await Client.Franchises.Get(gasStation.FranchiseId.Value)).Result;
+            if (gasStation.FranchiseId.HasValue)
+                franchise = (await Client.Franchises.Get(gasStation.FranchiseId.Value)).Result;
 
         submitPriceModel = new SubmitPriceModel { GasStationId = GasStationId, FuelType = FuelType.Petrol };
 
@@ -212,5 +223,16 @@
         priceSubmissions = priceSubmissionsResponse.Result;
 
         refreshing = false;
+    }
+
+    private async Task HandleRatePriceSubmission(long priceSubmissionId, bool positive)
+    {
+        var model = new AddPriceSubmissionRatingModel
+        {
+            Positive = positive
+        };
+
+        await Client.PriceSubmissions.Rate(priceSubmissionId, model);
+        await Refresh();
     }
 }

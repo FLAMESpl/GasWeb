@@ -41,13 +41,20 @@ namespace GasWeb.Domain
                 //b.HasIndex(x => new { x.GasStationId, x.CreatedByUserId, x.SubmissionDate, x.FuelType }).IsUnique();
                 b.Property(x => x.SubmissionDate).HasColumnType("date");
                 b.HasOne<GasStation>().WithMany().HasForeignKey(x => x.GasStationId);
+                b.HasMany(x => x.Ratings).WithOne().HasForeignKey(x => x.PriceSubmissionId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<PriceSubmissionRating>(b =>
+            {
+                b.HasKey(x => new { x.PriceSubmissionId, x.UserId });
+                b.HasOne<User>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.AuditEntity<Franchise>(b =>
             {
                 b.Property(x => x.Name).IsRequired();
                 b.HasIndex(x => x.Name).IsUnique();
-                b.HasMany(x => x.WholesalePrices).WithOne().HasForeignKey(x => x.FranchiseId);
+                b.HasMany(x => x.WholesalePrices).WithOne().HasForeignKey(x => x.FranchiseId).OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<FranchiseWholesalePrice>(b =>

@@ -1,6 +1,8 @@
 ﻿using GasWeb.Shared;
 using GasWeb.Shared.PriceSubmissions;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,17 +14,52 @@ namespace GasWeb.Domain.PriceSubmissions
         Task<long> SubmitPrice(SubmitPriceModel model);
         Task<PriceSubmission> Get(long id);
         Task<PageResponse<PriceSubmission>> GetList(GetPriceSubmissions query);
+        Task AddRating(long id, AddPriceSubmissionRatingModel model);
     }
 
     internal class PriceSubmissionsService : IPriceSubmissionsService
     {
         private readonly GasWebDbContext dbContext;
         private readonly IAuditMetadataProvider auditMetadataProvider;
+        private readonly UserContext userContext;
 
-        public PriceSubmissionsService(GasWebDbContext dbContext, IAuditMetadataProvider auditMetadataProvider)
+        public PriceSubmissionsService(
+            GasWebDbContext dbContext, 
+            IAuditMetadataProvider auditMetadataProvider,
+            UserContext userContext)
         {
             this.dbContext = dbContext;
             this.auditMetadataProvider = auditMetadataProvider;
+            this.userContext = userContext;
+        }
+
+        public async Task AddRating(long id, AddPriceSubmissionRatingModel model)
+        {
+            var priceSubmission = await dbContext.PriceSubmissions.GetAsync(id);
+            var rating = new Entities.PriceSubmissionRating(
+                priceSubmissionId: priceSubmission.Id,
+                userId: userContext.Id.Value,
+                positive: model.Positive,
+                submitedAt: DateTime.Now);
+
+            await dbContext.UpsertAsync(new[] { rating }, options => options
+                .SelectValues(x => new object[]
+                {
+                    x.Positive,
+                    x.PriceSubmissionId,
+                    $"'{x.SubmitedAt.ToString(CultureInfo.InvariantCulture)}'",
+                    x.UserId
+                })
+                .WithColumns(
+                    x => x.Positive,
+                    x => x.PriceSubmissionId,
+                    x => x.SubmitedAt,
+                    x => x.UserId
+                )
+                .ConflictOn(
+                    x => x.UserId,
+                    x => x.PriceSubmissionId
+                ));
         }
 
         public async Task DeleteSubmission(long priceSubmissionId)
@@ -40,7 +77,7 @@ namespace GasWeb.Domain.PriceSubmissions
 
         public Task<PageResponse<PriceSubmission>> GetList(GetPriceSubmissions query)
         {
-            var dbQuery = dbContext.PriceSubmissions.AsQueryable();
+            var dbQuery = dbContext.PriceSubmissions.Include(x => x.Ratings).AsQueryable();
 
             if (query.FuelTypes != (FuelType.Diesel | FuelType.Gas | FuelType.Petrol))
                 dbQuery = dbQuery.Where(x => query.FuelTypes.HasFlag(x.FuelType));
