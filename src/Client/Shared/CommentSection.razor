@@ -4,6 +4,7 @@
 <ErrorDisplay Errors="errors">
     @if (initialized)
     {
+        <h2>Komentarze</h2>
         <div class="card">
             <div class="card-body">
 
@@ -12,7 +13,6 @@
                     <ValidationSummary />
 
                     <div class="form-group">
-                        <label for="name">Nazwa</label>
                         <InputTextArea Id="comment" Class="form-control" @bind-Value="@addCommentModel.Content" />
                         <ValidationMessage For="@(() => addCommentModel.Content)" />
                     </div>

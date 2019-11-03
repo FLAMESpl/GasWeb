@@ -120,7 +120,7 @@
                             <td>@priceSubmission.Amount.ToDisplayAmount()</td>
                             <td>@userNames[priceSubmission.CreatedByUserId]</td>
                             <td>@priceSubmission.ModifiedAt</td>
-                            <td>@CalculateTotalRating(priceSubmission) (@(priceSubmission.Ratings?.Count ?? 0))</td>
+                            <td>@CalculateTotalRating(priceSubmission) (@(priceSubmission.Ratings?.Count(x => x.Value != PriceSubmissionRatingValue.Neutral) ?? 0))</td>
                             <td>
                                 <div>
                                     <button class="btn btn-primary"
@@ -131,7 +131,7 @@
                                     </button>
                                     <button class="btn btn-primary"
                                             type="submit"
-                                            @onclick="() => HandleRatePriceSubmission(priceSubmission.Id, PriceSubmissionRatingValue.Negative)">
+                                            @onclick="() => HandleRatePriceSubmission(priceSubmission.Id, PriceSubmissionRatingValue.Neutral)">
                                         Zero
                                     </button>
                                     <button class="btn btn-primary"
