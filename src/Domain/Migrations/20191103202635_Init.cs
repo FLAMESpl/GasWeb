@@ -26,6 +26,38 @@ namespace GasWeb.Domain.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Comments",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    CreatedByUserId = table.Column<long>(nullable: false),
+                    ModifiedByUserId = table.Column<long>(nullable: false),
+                    LastModified = table.Column<DateTime>(nullable: false),
+                    Content = table.Column<string>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    Tag = table.Column<int>(nullable: false),
+                    SubjectId = table.Column<string>(nullable: false),
+                    WasEdited = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Comments_Users_CreatedByUserId",
+                        column: x => x.CreatedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Comments_Users_ModifiedByUserId",
+                        column: x => x.ModifiedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Franchises",
                 columns: table => new
                 {
@@ -186,6 +218,42 @@ namespace GasWeb.Domain.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "PriceSubmissionRating",
+                columns: table => new
+                {
+                    PriceSubmissionId = table.Column<long>(nullable: false),
+                    UserId = table.Column<long>(nullable: false),
+                    Value = table.Column<int>(nullable: false),
+                    SubmitedAt = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PriceSubmissionRating", x => new { x.PriceSubmissionId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_PriceSubmissionRating_PriceSubmissions_PriceSubmissionId",
+                        column: x => x.PriceSubmissionId,
+                        principalTable: "PriceSubmissions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PriceSubmissionRating_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comments_CreatedByUserId",
+                table: "Comments",
+                column: "CreatedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comments_ModifiedByUserId",
+                table: "Comments",
+                column: "ModifiedByUserId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Franchises_CreatedByUserId",
                 table: "Franchises",
@@ -216,6 +284,11 @@ namespace GasWeb.Domain.Migrations
                 name: "IX_GasStations_ModifiedByUserId",
                 table: "GasStations",
                 column: "ModifiedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PriceSubmissionRating_UserId",
+                table: "PriceSubmissionRating",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PriceSubmissions_CreatedByUserId",
@@ -257,13 +330,19 @@ namespace GasWeb.Domain.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Comments");
+
+            migrationBuilder.DropTable(
                 name: "FranchiseWholesalePrice");
 
             migrationBuilder.DropTable(
-                name: "PriceSubmissions");
+                name: "PriceSubmissionRating");
 
             migrationBuilder.DropTable(
                 name: "Schedulers");
+
+            migrationBuilder.DropTable(
+                name: "PriceSubmissions");
 
             migrationBuilder.DropTable(
                 name: "GasStations");

@@ -3,6 +3,6 @@
     public class PriceSubmissionRating
     {
         public long UserId { get; set; }
-        public bool Positive { get; set; }
+        public PriceSubmissionRatingValue Value { get; set; }
     }
 }

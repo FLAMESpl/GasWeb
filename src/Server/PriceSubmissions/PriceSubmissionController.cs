@@ -48,7 +48,7 @@ namespace GasWeb.Server.PriceSubmissions
         }
 
         [HttpPut("{id:long}/rate")]
-        public async Task<IActionResult> Rate(long id, [FromBody] AddPriceSubmissionRatingModel model)
+        public async Task<IActionResult> Rate(long id, [FromBody] RatePriceSubmissionModel model)
         {
             await priceSubmissionsService.AddRating(id, model);
             return NoContent();

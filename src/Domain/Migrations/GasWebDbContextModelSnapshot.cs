@@ -164,9 +164,9 @@ namespace GasWeb.Domain.Migrations
 
                     b.Property<long>("UserId");
 
-                    b.Property<bool>("Positive");
-
                     b.Property<DateTime>("SubmitedAt");
+
+                    b.Property<int>("Value");
 
                     b.HasKey("PriceSubmissionId", "UserId");
 

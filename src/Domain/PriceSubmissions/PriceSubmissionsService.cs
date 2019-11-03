@@ -14,7 +14,7 @@ namespace GasWeb.Domain.PriceSubmissions
         Task<long> SubmitPrice(SubmitPriceModel model);
         Task<PriceSubmission> Get(long id);
         Task<PageResponse<PriceSubmission>> GetList(GetPriceSubmissions query);
-        Task AddRating(long id, AddPriceSubmissionRatingModel model);
+        Task AddRating(long id, RatePriceSubmissionModel model);
     }
 
     internal class PriceSubmissionsService : IPriceSubmissionsService
@@ -33,25 +33,25 @@ namespace GasWeb.Domain.PriceSubmissions
             this.userContext = userContext;
         }
 
-        public async Task AddRating(long id, AddPriceSubmissionRatingModel model)
+        public async Task AddRating(long id, RatePriceSubmissionModel model)
         {
             var priceSubmission = await dbContext.PriceSubmissions.GetAsync(id);
             var rating = new Entities.PriceSubmissionRating(
                 priceSubmissionId: priceSubmission.Id,
                 userId: userContext.Id.Value,
-                positive: model.Positive,
+                value: model.Value,
                 submitedAt: DateTime.Now);
 
             await dbContext.UpsertAsync(new[] { rating }, options => options
                 .SelectValues(x => new object[]
                 {
-                    x.Positive,
+                    (int)x.Value,
                     x.PriceSubmissionId,
                     $"'{x.SubmitedAt.ToString(CultureInfo.InvariantCulture)}'",
                     x.UserId
                 })
                 .WithColumns(
-                    x => x.Positive,
+                    x => x.Value,
                     x => x.PriceSubmissionId,
                     x => x.SubmitedAt,
                     x => x.UserId

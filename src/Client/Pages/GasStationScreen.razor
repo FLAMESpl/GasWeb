@@ -120,11 +120,26 @@
                             <td>@priceSubmission.Amount.ToDisplayAmount()</td>
                             <td>@userNames[priceSubmission.CreatedByUserId]</td>
                             <td>@priceSubmission.ModifiedAt</td>
-                            <td>@priceSubmission.Ratings?.Sum(x => x.Positive ? 1 : -1) (@priceSubmission.Ratings?.Count)</td>
+                            <td>@CalculateTotalRating(priceSubmission) (@(priceSubmission.Ratings?.Count ?? 0))</td>
                             <td>
                                 <div>
-                                    <button class="btn btn-primary" style="background-color: forestgreen; border-color: forestgreen" type="submit" @onclick="() => HandleRatePriceSubmission(priceSubmission.Id, true)">Plus</button>
-                                    <button class="btn btn-primary" style="background-color: orangered; border-color: orangered" type="submit" @onclick="() => HandleRatePriceSubmission(priceSubmission.Id, false)">Minus</button>
+                                    <button class="btn btn-primary"
+                                            style="background-color: forestgreen; border-color: forestgreen"
+                                            type="submit"
+                                            @onclick="() => HandleRatePriceSubmission(priceSubmission.Id, PriceSubmissionRatingValue.Positive)">
+                                        Plus
+                                    </button>
+                                    <button class="btn btn-primary"
+                                            type="submit"
+                                            @onclick="() => HandleRatePriceSubmission(priceSubmission.Id, PriceSubmissionRatingValue.Negative)">
+                                        Zero
+                                    </button>
+                                    <button class="btn btn-primary"
+                                            style="background-color: orangered; border-color: orangered"
+                                            type="submit"
+                                            @onclick="() => HandleRatePriceSubmission(priceSubmission.Id, PriceSubmissionRatingValue.Negative)">
+                                        Minus
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -225,14 +240,23 @@
         refreshing = false;
     }
 
-    private async Task HandleRatePriceSubmission(long priceSubmissionId, bool positive)
+    private async Task HandleRatePriceSubmission(long priceSubmissionId, PriceSubmissionRatingValue value)
     {
-        var model = new AddPriceSubmissionRatingModel
+        var model = new RatePriceSubmissionModel
         {
-            Positive = positive
+            Value = value
         };
 
         await Client.PriceSubmissions.Rate(priceSubmissionId, model);
         await Refresh();
     }
+
+    private int CalculateTotalRating(PriceSubmission submission) =>
+        submission.Ratings?.Sum(x => x.Value switch
+        {
+            PriceSubmissionRatingValue.Negative => -1,
+            PriceSubmissionRatingValue.Neutral => 0,
+            PriceSubmissionRatingValue.Positive => 1
+        })
+        ?? 0;
 }

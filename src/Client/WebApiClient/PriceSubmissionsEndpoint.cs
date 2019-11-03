@@ -10,7 +10,7 @@ namespace GasWeb.Client.WebApiClient
         {
         }
 
-        public Task Rate(long id, AddPriceSubmissionRatingModel model)
+        public Task Rate(long id, RatePriceSubmissionModel model)
         {
             return httpClient.SendJsonAsync(HttpMethod.Put, $"{Route}/{id}/rate", model);
         }

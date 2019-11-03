@@ -1,7 +1,7 @@
 ﻿namespace GasWeb.Shared.PriceSubmissions
 {
-    public class AddPriceSubmissionRatingModel
+    public class RatePriceSubmissionModel
     {
-        public bool Positive { get; set; }
+        public PriceSubmissionRatingValue Value { get; set; }
     }
 }

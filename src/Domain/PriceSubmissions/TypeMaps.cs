@@ -18,7 +18,7 @@ namespace GasWeb.Domain.PriceSubmissions
         public static PriceSubmissionRating ToContract(this Entities.PriceSubmissionRating domain)
             => new PriceSubmissionRating
             {
-                Positive = domain.Positive,
+                Value = domain.Value,
                 UserId = domain.UserId
             };
     }

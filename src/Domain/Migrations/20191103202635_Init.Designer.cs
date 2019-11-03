@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GasWeb.Domain.Migrations
 {
     [DbContext(typeof(GasWebDbContext))]
-    [Migration("20191103182749_AddSubjectId")]
-    partial class AddSubjectId
+    [Migration("20191103202635_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -160,6 +160,23 @@ namespace GasWeb.Domain.Migrations
                     b.ToTable("PriceSubmissions");
                 });
 
+            modelBuilder.Entity("GasWeb.Domain.PriceSubmissions.Entities.PriceSubmissionRating", b =>
+                {
+                    b.Property<long>("PriceSubmissionId");
+
+                    b.Property<long>("UserId");
+
+                    b.Property<DateTime>("SubmitedAt");
+
+                    b.Property<int>("Value");
+
+                    b.HasKey("PriceSubmissionId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PriceSubmissionRating");
+                });
+
             modelBuilder.Entity("GasWeb.Domain.Schedulers.Entities.Scheduler", b =>
                 {
                     b.Property<long>("Id");
@@ -280,6 +297,19 @@ namespace GasWeb.Domain.Migrations
                     b.HasOne("GasWeb.Domain.Users.Entities.User")
                         .WithMany()
                         .HasForeignKey("ModifiedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("GasWeb.Domain.PriceSubmissions.Entities.PriceSubmissionRating", b =>
+                {
+                    b.HasOne("GasWeb.Domain.PriceSubmissions.Entities.PriceSubmission")
+                        .WithMany("Ratings")
+                        .HasForeignKey("PriceSubmissionId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("GasWeb.Domain.Users.Entities.User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
