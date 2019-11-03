@@ -8,7 +8,6 @@
     protected override async Task OnInitializedAsync()
     {
         await AuthService.Logout();
-        UriHelper.NavigateTo("/");
+        UriHelper.NavigateTo("api/auth/logout?callback=/");
     }
-
 }

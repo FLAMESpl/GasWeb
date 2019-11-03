@@ -17,6 +17,7 @@ namespace GasWeb.Server.PriceSubmissions
         }
 
         [HttpPost]
+        [RequireUserRole]
         public async Task<IActionResult> Create([FromBody] SubmitPriceModel model)
         {
             var id = await priceSubmissionsService.SubmitPrice(model);
@@ -24,6 +25,7 @@ namespace GasWeb.Server.PriceSubmissions
         }
 
         [HttpDelete("{id:long}")]
+        [RequireUserRole]
         public async Task<IActionResult> Delete(long id)
         {
             await priceSubmissionsService.DeleteSubmission(id);

@@ -1,0 +1,96 @@
+﻿@using GasWeb.Shared.Comments
+@inject GasWebClient Client
+
+<ErrorDisplay Errors="errors">
+    @if (initialized)
+    {
+        <div class="card">
+            <div class="card-body">
+
+                <EditForm Model="@addCommentModel" OnValidSubmit="@HandleCommentSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="form-group">
+                        <label for="name">Nazwa</label>
+                        <InputTextArea Id="comment" Class="form-control" @bind-Value="@addCommentModel.Content" />
+                        <ValidationMessage For="@(() => addCommentModel.Content)" />
+                    </div>
+
+                    <input type="hidden" @bind-value="@addCommentModel.SubjectId" />
+                    <input type="hidden" @bind-value="@addCommentModel.Tag" />
+
+                    <button class="btn btn-primary" type="submit">Wyślij</button>
+                </EditForm>
+            </div>
+            <div class="card-body">
+                @foreach (var comment in comments)
+                {
+                    <div class="card">
+                        <div class="card-body">
+                            <p>@comment.CreatedAt przez @UserNames[comment.CreatedByUserId]</p>
+                            @comment.Content
+                            @if (comment.WasEdited)
+                            {
+                                <p>Zmodyfikowano @comment.LastModifiedAt przez @UserNames[comment.LastModifiedByUserId]</p>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <p>Loading...</p>
+    }
+</ErrorDisplay>
+
+@code {
+    [Parameter]
+    public CommentTag CommentTag { get; set; }
+
+    [Parameter]
+    public string SubjectId { get; set; }
+
+    [Parameter]
+    public IReadOnlyDictionary<long, string> UserNames { get; set; }
+
+    private bool initialized = false;
+    private List<Comment> comments;
+    private List<string> errors = new List<string>();
+    private AddCommentModel addCommentModel;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var commentsResponse = await Client.Comments.GetAllPages(new { tag = CommentTag, SubjectId });
+        errors.AddRange(commentsResponse.Errors);
+        comments = commentsResponse.Result;
+
+        if (UserNames == null)
+        {
+            var users = await Client.Users.GetList();
+            errors.AddRange(users.Errors);
+            UserNames = users.Result?.ToDictionary(x => x.Id, x => x.Name);
+        }
+
+        addCommentModel = NewAddCommentModel();
+        initialized = true;
+    }
+
+    private async Task HandleCommentSubmit()
+    {
+        var createResponse = await Client.Comments.Create<CreatedObject>(addCommentModel);
+        addCommentModel = NewAddCommentModel();
+
+        var commentResponse = await Client.Comments.Get(createResponse.Result.Id);
+        comments.Insert(0, commentResponse.Result);
+    }
+
+    private AddCommentModel NewAddCommentModel() =>
+        new AddCommentModel
+        {
+            SubjectId = SubjectId,
+            Tag = this.CommentTag
+        };
+}

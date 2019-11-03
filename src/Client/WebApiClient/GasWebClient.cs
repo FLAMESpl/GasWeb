@@ -1,8 +1,8 @@
 ﻿using GasWeb.Client.Services;
+using GasWeb.Shared.Comments;
 using GasWeb.Shared.Franchises;
 using GasWeb.Shared.GasStations;
 using GasWeb.Shared.PriceSubmissions;
-using GasWeb.Shared.Schedulers;
 using GasWeb.Shared.Users;
 using System.Net.Http;
 
@@ -17,6 +17,7 @@ namespace GasWeb.Client.WebApiClient
             GasStations = new Endpoint<GasStation>(httpClient, "api/gas-stations");
             PriceSubmissions = new Endpoint<PriceSubmission>(httpClient, "api/price-submissions");
             Schedulers = new SchedulersEndpoint(httpClient, "api/schedulers");
+            Comments = new Endpoint<Comment>(httpClient, "api/comments");
             AuthService = authService;
         }
 
@@ -26,5 +27,6 @@ namespace GasWeb.Client.WebApiClient
         public Endpoint<GasStation> GasStations { get; }
         public Endpoint<PriceSubmission> PriceSubmissions { get; }
         public SchedulersEndpoint Schedulers { get; }
+        public Endpoint<Comment> Comments { get; }
     }
 }

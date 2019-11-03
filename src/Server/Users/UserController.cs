@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 namespace GasWeb.Server.Users
 {
     [Route("api/users")]
-    [RequireModeratorRole]
     public class UserController : ControllerBase
     {
         private readonly IUserService userService;
@@ -34,6 +33,7 @@ namespace GasWeb.Server.Users
         }
 
         [HttpPatch("{id:long}")]
+        [RequireModeratorRole]
         public async Task<IActionResult> Update(long id, [FromBody] UserUpdateModel updateModel)
         {
             await userService.Update(id, updateModel);

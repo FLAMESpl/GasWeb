@@ -17,18 +17,21 @@ namespace GasWeb.Server.Schedulers
         }
 
         [HttpGet]
+        [RequireModeratorRole]
         public Task<PageResponse<Scheduler>> GetList(int pageNumber = RequestDefaults.PageNumber, int pageSize = RequestDefaults.PageSize)
         {
             return service.GetList(pageNumber, pageSize);
         }
 
         [HttpGet("{id:long}")]
+        [RequireAdminRole]
         public Task<Scheduler> Get(long id)
         {
             return service.Get(id);
         }
 
         [HttpPut("{id:long}")]
+        [RequireAdminRole]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateSchedulerModel model)
         {
             await service.Update(id, model);
@@ -36,6 +39,7 @@ namespace GasWeb.Server.Schedulers
         }
 
         [HttpPost("{id:long}/trigger")]
+        [RequireAdminRole]
         public async Task<IActionResult> Trigger(long id)
         {
             await service.Trigger(id);

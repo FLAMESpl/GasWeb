@@ -7,68 +7,69 @@
 
 <h1>Franczyzny</h1>
 
-@if (franchises == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div class="card">
-        <div class="card-body">
-            @if (expandEditForm)
-            {
-                <EditForm Model="@addFranchiseModel" OnValidSubmit="@HandleAddFranchise">
-                    <DataAnnotationsValidator />
-                    <ValidationSummary />
-                    
-                    <div class="form-group form-horizontal">
-                        <label for="name">Nazwa</label>
-                        <InputText Id="name" Class="form-control" @bind-Value="@addFranchiseModel.Name" />
-                        <ValidationMessage For="@(() => addFranchiseModel.Name)" />
-                    </div>
+<ErrorDisplay Errors="errors">
 
-                    <div class="form-group form-horizontal">
-                        <button type="submit" class="btn btn-primary">Zapisz</button>
-                        <button class="btn btn-outline-secondary" @onclick="() => expandEditForm = false">Anuluj</button>
-                    </div>
+    @if (!initialized)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body">
+                @if (expandEditForm)
+                {
+                    <EditForm Model="@addFranchiseModel" OnValidSubmit="@HandleAddFranchise">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
 
-                </EditForm>
-            }
-            else
-            {
-                <button type="submit" class="btn btn-primary" @onclick="() => expandEditForm = true">Dodaj</button>
-            }
+                        <div class="form-group form-horizontal">
+                            <label for="name">Nazwa</label>
+                            <InputText Id="name" Class="form-control" @bind-Value="@addFranchiseModel.Name" />
+                            <ValidationMessage For="@(() => addFranchiseModel.Name)" />
+                        </div>
+
+                        <div class="form-group form-horizontal">
+                            <button type="submit" class="btn btn-primary">Zapisz</button>
+                            <button class="btn btn-outline-secondary" @onclick="() => expandEditForm = false">Anuluj</button>
+                        </div>
+
+                    </EditForm>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-primary" @onclick="() => expandEditForm = true">Dodaj</button>
+                }
             </div>
-    </div>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nazwa</th>
-                <th>Utworzono przez</th>
-                <th>Ostatnia modyfikacja</th>
-                <th>Hurt. cena benzyny</th>
-                <th>Hurt. cena diesela</th>
-                <th>Hurt. cena gazu</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var franchise in franchises)
-            {
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>@franchise.Id</td>
-                    <td>@franchise.Name</td>
-                    <td>@userNames[franchise.CreatedByUserId]</td>
-                    <td>@franchise.ModifiedAt</td>
-                    <td>@franchise.FindPrice(FuelType.Petrol)?.ToDisplayAmount()</td>
-                    <td>@franchise.FindPrice(FuelType.Diesel)?.ToDisplayAmount()</td>
-                    <td>@franchise.FindPrice(FuelType.Gas)?.ToDisplayAmount()</td>
+                    <th>Id</th>
+                    <th>Nazwa</th>
+                    <th>Utworzono przez</th>
+                    <th>Ostatnia modyfikacja</th>
+                    <th>Hurt. cena benzyny</th>
+                    <th>Hurt. cena diesela</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
+            </thead>
+            <tbody>
+                @foreach (var franchise in franchises)
+                {
+                    <tr>
+                        <td>@franchise.Id</td>
+                        <td>@franchise.Name</td>
+                        <td>@userNames[franchise.CreatedByUserId]</td>
+                        <td>@franchise.ModifiedAt</td>
+                        <td>@franchise.FindPrice(FuelType.Petrol)?.ToDisplayAmount()</td>
+                        <td>@franchise.FindPrice(FuelType.Diesel)?.ToDisplayAmount()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</ErrorDisplay>
 
 <style>
     .hoverTable {
@@ -82,16 +83,28 @@ else
 </style>
 
 @code {
+    bool expandEditForm = false;
+    bool initialized = false;
+    IReadOnlyCollection<string> errors;
     IReadOnlyCollection<Franchise> franchises;
     Dictionary<long, string> userNames;
-    bool expandEditForm = false;
     AddFranchiseModel addFranchiseModel = new AddFranchiseModel();
 
     protected override async Task OnInitializedAsync()
     {
-        var users = await Client.Users.GetList();
-        franchises = await Client.Franchises.GetAllPages();
-        userNames = users.ToDictionary(x => x.Id, x => x.Name);
+        var usersResponse = await Client.Users.GetList();
+        var franchiseResponse = await Client.Franchises.GetAllPages();
+
+        var aggregated = AggregatedServerResult.From(usersResponse, franchiseResponse);
+        errors = aggregated.Errors;
+
+        if (aggregated.Successful)
+        {
+            userNames = usersResponse.Result.ToDictionary(x => x.Id, x => x.Name);
+            franchises = franchiseResponse.Result;
+        }
+
+        initialized = true;
     }
 
     private async Task HandleAddFranchise()

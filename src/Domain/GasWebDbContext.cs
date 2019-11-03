@@ -1,4 +1,5 @@
-﻿using GasWeb.Domain.Franchises.Entities;
+﻿using GasWeb.Domain.Comments.Entities;
+using GasWeb.Domain.Franchises.Entities;
 using GasWeb.Domain.GasStations.Entities;
 using GasWeb.Domain.PriceSubmissions.Entities;
 using GasWeb.Domain.Schedulers.Entities;
@@ -18,6 +19,7 @@ namespace GasWeb.Domain
         internal DbSet<PriceSubmission> PriceSubmissions { get; private set; }
         internal DbSet<Franchise> Franchises { get; private set; }
         internal DbSet<Scheduler> Schedulers { get; private set; }
+        internal DbSet<Comment> Comments { get; private set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -57,6 +59,12 @@ namespace GasWeb.Domain
             {
                 b.Property(x => x.Id).ValueGeneratedNever();
                 b.HasOne<Franchise>().WithMany().HasForeignKey(x => x.FranchiseId);
+            });
+
+            modelBuilder.AuditEntity<Comment>(b =>
+            {
+                b.Property(x => x.Content).IsRequired();
+                b.Property(x => x.SubjectId).IsRequired();
             });
         }
     }

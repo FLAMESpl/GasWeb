@@ -1,104 +1,105 @@
 ﻿@page "/gas-stations"
-@using GasWeb.Shared
 @using GasWeb.Shared.GasStations
-@using GasWeb.Shared.Franchises
-@using GasWeb.Shared.Users
 @using GasWeb.Client.Pages.ViewModels
 @inject GasWebClient Client
 @inject NavigationManager NavigationManager
 
 <h1>Stacje benzynowe</h1>
 
-@if (gasStations == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div class="card">
-        <div class="card-body">
-            @if (expandEditForm)
-            {
-            <EditForm Model="@addGasStationViewModel" OnValidSubmit="@HandleAddGasStation">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
+<ErrorDisplay Errors="errors">
 
-                <div class="form-group form-horizontal">
-                    <label for="name">Nazwa</label>
-                    <InputText Id="name" Class="form-control" @bind-Value="@addGasStationViewModel.Name" />
-                    <ValidationMessage For="@(() => addGasStationViewModel.Name)" />
-                </div>
+    @if (gasStations == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body">
+                @if (expandEditForm)
+                {
+                    <EditForm Model="@addGasStationViewModel" OnValidSubmit="@HandleAddGasStation">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
 
-                <div class="form-group form-horizontal">
-                    <label for="franchise">Franczyzna</label>
-                    <InputSelect Id="franchise" Class="form-control" @bind-Value="@addGasStationViewModel.Franchise">
-                        <option></option>
-                        @foreach (var name in franchiseNames.Values)
-                        {
-                            <option>@name</option>
-                        }
-                    </InputSelect>
-                    <ValidationMessage For="@(() => addGasStationViewModel.Franchise)" />
-                </div>
-
-                <div class="form-group form-horizontal">
-                    <label for="address1">Adres 1</label>
-                    <InputText Id="address1" Class="form-control" @bind-Value="@addGasStationViewModel.AddressLine1" />
-                    <ValidationMessage For="@(() => addGasStationViewModel.AddressLine1)" />
-                </div>
-
-                <div class="form-group form-horizontal">
-                    <label for="address2">Adres 2</label>
-                    <InputText Id="address2" Class="form-control" @bind-Value="@addGasStationViewModel.AddressLine1" />
-                    <ValidationMessage For="@(() => addGasStationViewModel.AddressLine2)" />
-                </div>
-
-                <div class="form-group form-horizontal">
-                    <button type="submit" class="btn btn-primary">Zapisz</button>
-                    <button class="btn btn-outline-secondary" @onclick="() => expandEditForm = false">Anuluj</button>
-                </div>
-
-            </EditForm>
-            }
-            else
-            {
-                <button type="submit" class="btn btn-primary" @onclick="() => expandEditForm = true">Dodaj</button>
-            }
-        </div>
-    </div>
-
-    <table class="hoverTable table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nazwa</th>
-                <th>Franczyzna</th>
-                <th>Lokacja</th>
-                <th>Utworzono przez</th>
-                <th>Ostatnia modyfikacja</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var gasStation in gasStations)
-            {
-                <tr @onclick="() => NaviagateToGasStation(gasStation.Id)" style="cursor:pointer">
-                    <td>@gasStation.Id</td>
-                    <td>@gasStation.Name</td>
-                    <td>@(gasStation.FranchiseId.HasValue ? franchiseNames[gasStation.FranchiseId.Value] : "")</td>
-                    <td>
-                        <div>
-                            @gasStation.AddressLine1
-                            &emsp;
-                            @gasStation.AddressLine2
+                        <div class="form-group form-horizontal">
+                            <label for="name">Nazwa</label>
+                            <InputText Id="name" Class="form-control" @bind-Value="@addGasStationViewModel.Name" />
+                            <ValidationMessage For="@(() => addGasStationViewModel.Name)" />
                         </div>
-                    </td>
-                    <td>@userNames[gasStation.CreatedByUserId]</td>
-                    <td>@gasStation.LastModifiedAt</td>
+
+                        <div class="form-group form-horizontal">
+                            <label for="franchise">Franczyzna</label>
+                            <InputSelect Id="franchise" Class="form-control" @bind-Value="@addGasStationViewModel.Franchise">
+                                <option></option>
+                                @foreach (var name in franchiseNames.Values)
+                                        {
+                                    <option>@name</option>
+                                        }
+                                /**/
+                                /**/
+                            </InputSelect>
+                            <ValidationMessage For="@(() => addGasStationViewModel.Franchise)" />
+                        </div>
+
+                        <div class="form-group form-horizontal">
+                            <label for="address1">Adres 1</label>
+                            <InputText Id="address1" Class="form-control" @bind-Value="@addGasStationViewModel.AddressLine1" />
+                            <ValidationMessage For="@(() => addGasStationViewModel.AddressLine1)" />
+                        </div>
+
+                        <div class="form-group form-horizontal">
+                            <label for="address2">Adres 2</label>
+                            <InputText Id="address2" Class="form-control" @bind-Value="@addGasStationViewModel.AddressLine1" />
+                            <ValidationMessage For="@(() => addGasStationViewModel.AddressLine2)" />
+                        </div>
+
+                        <div class="form-group form-horizontal">
+                            <button type="submit" class="btn btn-primary">Zapisz</button>
+                            <button class="btn btn-outline-secondary" @onclick="() => expandEditForm = false">Anuluj</button>
+                        </div>
+
+                    </EditForm>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-primary" @onclick="() => expandEditForm = true">Dodaj</button>
+                }
+            </div>
+        </div>
+
+        <table class="hoverTable table">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Nazwa</th>
+                    <th>Franczyzna</th>
+                    <th>Lokacja</th>
+                    <th>Utworzono przez</th>
+                    <th>Ostatnia modyfikacja</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
+            </thead>
+            <tbody>
+                @foreach (var gasStation in gasStations)
+                {
+                    <tr @onclick="() => NaviagateToGasStation(gasStation.Id)" style="cursor:pointer">
+                        <td>@gasStation.Id</td>
+                        <td>@gasStation.Name</td>
+                        <td>@(gasStation.FranchiseId.HasValue ? franchiseNames[gasStation.FranchiseId.Value] : "")</td>
+                        <td>
+                            <div>
+                                @gasStation.AddressLine1
+                                &emsp;
+                                @gasStation.AddressLine2
+                            </div>
+                        </td>
+                        <td>@userNames[gasStation.CreatedByUserId]</td>
+                        <td>@gasStation.LastModifiedAt</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 
 <style>
     .hoverTable {
@@ -110,9 +111,11 @@ else
             background-color: #00e673;
         }
 </style>
+</ErrorDisplay>
 
 @code {
     IReadOnlyCollection<GasStation> gasStations;
+    IReadOnlyCollection<string> errors;
     Dictionary<long, string> userNames;
     Dictionary<long, string> franchiseNames;
     bool expandEditForm = false;
@@ -126,9 +129,19 @@ else
 
         await Task.WhenAll(usersTask, franchisesTask, gasStationsTask);
 
-        gasStations = gasStationsTask.Result;
-        userNames = usersTask.Result.ToDictionary(x => x.Id, x => x.Name);
-        franchiseNames = franchisesTask.Result.ToDictionary(x => x.Id, x => x.Name);
+        var usersResponse = usersTask.Result;
+        var franchiseResponse = franchisesTask.Result;
+        var gasStationsResponse = gasStationsTask.Result;
+
+        var aggregated = AggregatedServerResult.From(usersResponse, franchiseResponse, gasStationsResponse);
+        errors = aggregated.Errors;
+
+        if (aggregated.Successful)
+        {
+            gasStations = gasStationsResponse.Result;
+            userNames = usersResponse.Result.ToDictionary(x => x.Id, x => x.Name);
+            franchiseNames = franchiseResponse.Result.ToDictionary(x => x.Id, x => x.Name);
+        }
     }
 
     private void NaviagateToGasStation(long gasStationId)

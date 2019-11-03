@@ -46,7 +46,6 @@ namespace GasWeb.Client.Services
 
         public async Task Logout()
         {
-            await httpClient.PostJsonAsync("api/auth/logout", null);
             await localStorage.RemoveItemAsync<UserContext>();
             authenticationStateProvider.MarkUserAsLoggedOut();
         }

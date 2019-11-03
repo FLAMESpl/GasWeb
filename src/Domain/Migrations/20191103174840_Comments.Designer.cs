@@ -3,15 +3,17 @@ using System;
 using GasWeb.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace GasWeb.Domain.Migrations
 {
     [DbContext(typeof(GasWebDbContext))]
-    partial class GasWebDbContextModelSnapshot : ModelSnapshot
+    [Migration("20191103174840_Comments")]
+    partial class Comments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,9 +36,6 @@ namespace GasWeb.Domain.Migrations
                     b.Property<DateTime>("LastModified");
 
                     b.Property<long>("ModifiedByUserId");
-
-                    b.Property<string>("SubjectId")
-                        .IsRequired();
 
                     b.Property<int>("Tag");
 

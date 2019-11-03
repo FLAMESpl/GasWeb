@@ -1,5 +1,4 @@
 ﻿using GasWeb.Shared;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Routing;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,32 +19,37 @@ namespace GasWeb.Client.WebApiClient
 
         public string Route { get; }
 
-        public Task Create(object model)
+        public Task<ServerResponse> Create(object model)
         {
-            return httpClient.PostJsonAsync(Route, model);
+            return httpClient.SendJsonAsync(HttpMethod.Post, Route, model);
         }
 
-        public Task Update(long id, object model)
+        public Task<ServerResponse<T>> Create<T>(object model) where T : class
+        {
+            return httpClient.SendJsonAsync<T>(HttpMethod.Post, Route, model);
+        }
+
+        public Task<ServerResponse> Update(long id, object model)
         {
             return httpClient.SendJsonAsync(HttpMethod.Put, $"{Route}/{id}", model);
         }
 
-        public Task Delete(long id)
+        public Task<ServerResponse> Delete(long id)
         {
-            return httpClient.DeleteAsync($"{Route}/{id}");
+            return httpClient.SendJsonAsync(HttpMethod.Delete, $"{Route}/{id}");
         }
 
-        public Task<T> Get<T>(long id)
+        public Task<ServerResponse<T>> Get<T>(long id) where T : class
         {
             return httpClient.Get<T>($"{Route}/{id}");
         }
 
-        public Task<IReadOnlyCollection<T>> GetList<T>(object queryParameters = null)
+        public Task<ServerResponse<IReadOnlyCollection<T>>> GetList<T>(object queryParameters = null)
         {
             return httpClient.Get<IReadOnlyCollection<T>>(Route, queryParameters);
         }
 
-        public Task<PageResponse<T>> GetPage<T>(int pageNumber, int pageSize, object queryParameters = null)
+        public Task<ServerResponse<PageResponse<T>>> GetPage<T>(int pageNumber, int pageSize, object queryParameters = null)
         {
             return httpClient.Get<PageResponse<T>>(Route, new RouteValueDictionary(queryParameters)
             {
@@ -54,7 +58,7 @@ namespace GasWeb.Client.WebApiClient
             });
         }
 
-        public async Task<IReadOnlyCollection<T>> GetAllPages<T>(object queryParameters = null)
+        public async Task<ServerResponse<List<T>>> GetAllPages<T>(object queryParameters = null)
         {
             var results = new List<T>();
             var currentPage = 1;
@@ -62,10 +66,14 @@ namespace GasWeb.Client.WebApiClient
 
             while(true)
             {
-                var pageResponse = await GetPage<T>(currentPage, pageSize, queryParameters);
-                results.AddRange(pageResponse.Results);
+                var response = await GetPage<T>(currentPage, pageSize, queryParameters);
+                if (!response.Successful)
+                    return response.To<List<T>>();
 
-                if (results.Count < pageResponse.Paging.TotalCount && pageResponse.Results.Any())
+                var page = response.Result;
+                results.AddRange(page.Results);
+
+                if (results.Count < page.Paging.TotalCount && page.Results.Any())
                 {
                     currentPage++;
                 }
@@ -76,19 +84,19 @@ namespace GasWeb.Client.WebApiClient
 
             }
 
-            return results;
+            return ServerResponse.Success(results);
         }
     }
 
-    public class Endpoint<T> : Endpoint
+    public class Endpoint<T> : Endpoint where T : class
     {
         public Endpoint(HttpClient httpClient, string route) : base(httpClient, route)
         {
         }
 
-        public Task<T> Get(long id) => Get<T>(id);
-        public Task<IReadOnlyCollection<T>> GetList(object queryParameters = null) => GetList<T>(queryParameters);
-        public Task<PageResponse<T>> GetPage(int number, int size, object queryParameters = null) => GetPage<T>(number, size, queryParameters);
-        public Task<IReadOnlyCollection<T>> GetAllPages(object queryParameters = null) => GetAllPages<T>(queryParameters);
+        public Task<ServerResponse<T>> Get(long id) => Get<T>(id);
+        public Task<ServerResponse<IReadOnlyCollection<T>>> GetList(object queryParameters = null) => GetList<T>(queryParameters);
+        public Task<ServerResponse<PageResponse<T>>> GetPage(int number, int size, object queryParameters = null) => GetPage<T>(number, size, queryParameters);
+        public Task<ServerResponse<List<T>>> GetAllPages(object queryParameters = null) => GetAllPages<T>(queryParameters);
     }
 }

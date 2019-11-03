@@ -1,0 +1,18 @@
+﻿@if (Errors != null && Errors.Any())
+{
+    <div class="alert alert-danger" role="alert">
+        @foreach (var error in Errors)
+        {
+            <p>@error</p>
+        }
+    </div>
+}
+else
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public IReadOnlyCollection<string> Errors { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+}

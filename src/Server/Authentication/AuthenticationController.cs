@@ -79,18 +79,12 @@ namespace GasWeb.Server.Authentication
             return Ok(new RegisterResult { Successful = true });
         }
 
-        [HttpPost("logout")]
+        [HttpGet("logout")]
         //[ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
+        public async Task Logout(string callback)
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return NoContent();
-        }
-
-        [HttpGet("accessdenied")]
-        public async Task<IActionResult> AccessDenied()
-        {
-            return Unauthorized();
+            await HttpContext.ForbidAsync("Facebook", new AuthenticationProperties { RedirectUri = callback });
         }
 
         [HttpGet("login-facebook")]
