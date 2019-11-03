@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using GasWeb.Domain.Franchises.Entities;
+using GasWeb.Domain.PriceSubmissions.Entities;
 using GasWeb.Shared.GasStations;
 
 namespace GasWeb.Domain.GasStations.Entities
@@ -19,6 +22,9 @@ namespace GasWeb.Domain.GasStations.Entities
         public string AddressLine2 { get; private set; }
         public long? FranchiseId { get; private set; }
         public bool MaintainedBySystem { get; private set; }
+
+        public Franchise Franchise { get; private set; }
+        public ICollection<PriceSubmission> SubmitedPrices { get; private set; }
 
         internal void Update(UpdateGasStationModel model)
         {

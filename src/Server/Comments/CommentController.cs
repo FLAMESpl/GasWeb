@@ -30,7 +30,7 @@ namespace GasWeb.Server.Comments
             return NoContent();
         }
 
-        [HttpPut("{id:long}")]
+        [HttpDelete("{id:long}")]
         public async Task<IActionResult> Delete(long id)
         {
             await service.Delete(id);

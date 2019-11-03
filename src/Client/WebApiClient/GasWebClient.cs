@@ -17,6 +17,7 @@ namespace GasWeb.Client.WebApiClient
             PriceSubmissions = new PriceSubmissionsEndpoint(httpClient, "api/price-submissions");
             Schedulers = new SchedulersEndpoint(httpClient, "api/schedulers");
             Comments = new Endpoint<Comment>(httpClient, "api/comments");
+            Dashboards = new DashboardsEndpoints(httpClient);
             AuthService = authService;
         }
 
@@ -27,5 +28,6 @@ namespace GasWeb.Client.WebApiClient
         public PriceSubmissionsEndpoint PriceSubmissions { get; }
         public SchedulersEndpoint Schedulers { get; }
         public Endpoint<Comment> Comments { get; }
+        public DashboardsEndpoints Dashboards { get; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using GasWeb.Domain.Comments;
+using GasWeb.Domain.Dashboards;
 using GasWeb.Domain.Franchises;
 using GasWeb.Domain.Franchises.Bp;
 using GasWeb.Domain.Franchises.Lotos;
@@ -26,6 +27,7 @@ namespace GasWeb.Domain
             services.AddScoped<IFranchiseService, FranchiseService>();
             services.AddScoped<ISchedulerService, SchedulerService>();
             services.AddScoped<ICommentService, CommentService>();
+            services.AddScoped<IDashboardService, DashboardService>();
             services.AddSingleton<IScheduledExecutor, ScheduledExecutor>();
             services.AddScoped(sp => sp.GetRequiredService<SystemFranchiseCollectionFactory>().Create());
             services.AddScoped<IAuditMetadataProvider, UserContextAuditMetadataProvider>();

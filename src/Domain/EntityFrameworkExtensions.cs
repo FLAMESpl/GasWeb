@@ -27,6 +27,14 @@ namespace GasWeb.Domain
             return await queryable.FirstOrDefaultAsync(selector) ?? throw new EntityNotFound();
         }
 
+        public static Task<PageResponse<T>> PickPageAsync<T>(
+            this IQueryable<T> query,
+            int pageNumber,
+            int pageSize)
+        {
+            return PickPageAsync(query, pageNumber, pageSize, x => x);
+        }
+
         public static async Task<PageResponse<TResult>> PickPageAsync<T, TResult>(
             this IQueryable<T> query, 
             int pageNumber, 
@@ -35,6 +43,7 @@ namespace GasWeb.Domain
         {
             if (pageNumber < 1) throw new ArgumentException("Page number must be greater than zero", nameof(pageNumber));
             if (pageSize < 1) throw new ArgumentException("Page number must be greater than zero", nameof(pageNumber));
+            if (map == null) throw new ArgumentNullException(nameof(map));
 
             if (pageSize > 200)
                 pageSize = MaxPageSize;

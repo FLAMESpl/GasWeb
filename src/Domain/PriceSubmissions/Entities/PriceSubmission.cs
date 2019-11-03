@@ -1,6 +1,8 @@
 ﻿using GasWeb.Shared;
+using GasWeb.Shared.PriceSubmissions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GasWeb.Domain.PriceSubmissions.Entities
 {
@@ -30,5 +32,12 @@ namespace GasWeb.Domain.PriceSubmissions.Entities
         public FuelType FuelType { get; private set; }
 
         public ICollection<PriceSubmissionRating> Ratings { get; private set; }
+
+        public int TotalScore => Ratings.Sum(x => x.Value switch
+            {
+                PriceSubmissionRatingValue.Negative => -1,
+                PriceSubmissionRatingValue.Neutral => 0,
+                PriceSubmissionRatingValue.Positive => 1
+            });
     }
 }
