@@ -88,9 +88,21 @@ namespace GasWeb.Server.Authentication
         }
 
         [HttpGet("login-facebook")]
-        public async Task LoginExternal(string callback)
+        public async Task<IActionResult> LoginExternal(string callback)
         {
-            await HttpContext.ChallengeAsync("Facebook", new AuthenticationProperties { RedirectUri = callback });
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "test"),
+                new Claim(ClaimTypes.Name, "Łukasz Szafirski")
+            };
+
+            var identity = new ClaimsIdentity(claims, "TempCookie");
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync("TempCookie", principal);
+
+            return Redirect(callback);
+            //await HttpContext.ChallengeAsync("Facebook", new AuthenticationProperties { RedirectUri = callback });
         }
 
         private async Task SignIn(User user)
