@@ -81,7 +81,9 @@
                 @foreach (var vm in gasStations)
                 {
                     <tr @onclick="() => NaviagateToGasStation(vm.Item.GasStation.Id)" style="cursor:pointer">
-                        <td>@vm.Item.GasStation.Name</td>
+                        <td>
+                            <h5>@vm.Item.GasStation.Name</h5>
+                        </td>
                         <td>@vm.Item.FranchiseName</td>
                         <td>
                             <div>
