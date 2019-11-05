@@ -58,33 +58,9 @@ namespace GasWeb.Client.WebApiClient
             });
         }
 
-        public async Task<ServerResponse<List<T>>> GetAllPages<T>(object queryParameters = null)
+        public Task<ServerResponse<List<T>>> GetAllPages<T>(object queryParameters = null) where T : class
         {
-            var results = new List<T>();
-            var currentPage = 1;
-            var pageSize = int.MaxValue;
-
-            while(true)
-            {
-                var response = await GetPage<T>(currentPage, pageSize, queryParameters);
-                if (!response.Successful)
-                    return response.To<List<T>>();
-
-                var page = response.Result;
-                results.AddRange(page.Results);
-
-                if (results.Count < page.Paging.TotalCount && page.Results.Any())
-                {
-                    currentPage++;
-                }
-                else
-                {
-                    break;
-                }
-
-            }
-
-            return ServerResponse.Success(results);
+            return QueryingExtensions.GetAllPages((pageNumber, pageSize) => GetPage<T>(pageNumber, pageSize, queryParameters));
         }
     }
 

@@ -39,7 +39,7 @@ namespace GasWeb.Domain.Dashboards
                 results: gasStations.Results
                     .Select(x => new GasStationsDashboardItem(
                         gasStation: x.ToContract(),
-                        franchiseName: x.Franchise.Name,
+                        franchiseName: x.Franchise?.Name,
                         wholesalePrices: new FuelPrices(
                             petrol: x.Franchise.WholesalePrices.SingleOrDefault(x => x.FuelType == FuelType.Petrol)?.Amount,
                             diesel: x.Franchise.WholesalePrices.SingleOrDefault(x => x.FuelType == FuelType.Diesel)?.Amount),

@@ -1,4 +1,5 @@
 ﻿@page "/gas-stations"
+@using GasWeb.Shared.Dashboards.GasStations
 @using GasWeb.Shared.GasStations
 @using GasWeb.Client.Pages.ViewModels
 @inject GasWebClient Client
@@ -33,11 +34,9 @@
                             <InputSelect Id="franchise" Class="form-control" @bind-Value="@addGasStationViewModel.Franchise">
                                 <option></option>
                                 @foreach (var name in franchiseNames.Values)
-                                        {
+                                {
                                     <option>@name</option>
-                                        }
-                                /**/
-                                /**/
+                                }
                             </InputSelect>
                             <ValidationMessage For="@(() => addGasStationViewModel.Franchise)" />
                         </div>
@@ -71,30 +70,37 @@
         <table class="hoverTable table">
             <thead>
                 <tr>
-                    <th>Id</th>
                     <th>Nazwa</th>
                     <th>Franczyzna</th>
                     <th>Lokacja</th>
-                    <th>Utworzono przez</th>
-                    <th>Ostatnia modyfikacja</th>
+                    <th>Ceny użytkowników</th>
+                    <th>Ceny hurtowe</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var gasStation in gasStations)
+                @foreach (var vm in gasStations)
                 {
-                    <tr @onclick="() => NaviagateToGasStation(gasStation.Id)" style="cursor:pointer">
-                        <td>@gasStation.Id</td>
-                        <td>@gasStation.Name</td>
-                        <td>@(gasStation.FranchiseId.HasValue ? franchiseNames[gasStation.FranchiseId.Value] : "")</td>
+                    <tr @onclick="() => NaviagateToGasStation(vm.Item.GasStation.Id)" style="cursor:pointer">
+                        <td>@vm.Item.GasStation.Name</td>
+                        <td>@vm.Item.FranchiseName</td>
                         <td>
                             <div>
-                                @gasStation.AddressLine1
-                                &emsp;
-                                @gasStation.AddressLine2
+                                <p>@vm.Item.GasStation.AddressLine1</p>
+                                <p>@vm.Item.GasStation.AddressLine2</p>
                             </div>
                         </td>
-                        <td>@userNames[gasStation.CreatedByUserId]</td>
-                        <td>@gasStation.LastModifiedAt</td>
+                        <td>
+                            <div>
+                                <p>Benzyna: @vm.Item.MinimalSubmittedPrices.Petrol?.ToDisplayAmount() - @vm.Item.MaximalSubmittedPrices.Petrol?.ToDisplayAmount()</p>
+                                <p>Diesel: @vm.Item.MinimalSubmittedPrices.Diesel?.ToDisplayAmount() - @vm.Item.MaximalSubmittedPrices.Diesel?.ToDisplayAmount()</p>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <p>Benzyna: @vm.Item.WholesalePrices.Petrol?.ToDisplayAmount()</p>
+                                <p>Diesel: @vm.Item.WholesalePrices.Diesel?.ToDisplayAmount()</p>
+                            </div>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -114,7 +120,7 @@
 </ErrorDisplay>
 
 @code {
-    IReadOnlyCollection<GasStation> gasStations;
+    IReadOnlyCollection<GasStationDashboardItemViewModel> gasStations;
     IReadOnlyCollection<string> errors;
     Dictionary<long, string> userNames;
     Dictionary<long, string> franchiseNames;
@@ -125,7 +131,7 @@
     {
         var usersTask = Client.Users.GetList();
         var franchisesTask = Client.Franchises.GetAllPages();
-        var gasStationsTask = Client.GasStations.GetAllPages();
+        var gasStationsTask = Client.Dashboards.GetGasStations();
 
         await Task.WhenAll(usersTask, franchisesTask, gasStationsTask);
 
@@ -138,7 +144,14 @@
 
         if (aggregated.Successful)
         {
-            gasStations = gasStationsResponse.Result;
+            gasStations = gasStationsResponse.Result
+                .Select(x => new GasStationDashboardItemViewModel
+                {
+                    Expanded = false,
+                    Item = x
+                })
+                .ToList();
+
             userNames = usersResponse.Result.ToDictionary(x => x.Id, x => x.Name);
             franchiseNames = franchiseResponse.Result.ToDictionary(x => x.Id, x => x.Name);
         }
