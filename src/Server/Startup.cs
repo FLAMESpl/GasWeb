@@ -1,4 +1,5 @@
 using GasWeb.Domain;
+using GasWeb.Server.Authentication;
 using GasWeb.Server.Schedulers;
 using GasWeb.Server.Settings;
 using GasWeb.Server.Users;
@@ -43,6 +44,7 @@ namespace GasWeb.Server
 
             services.AddHostedService<InitializationHostedService>();
             services.AddHostedService<SchedulersHostedService>();
+            services.AddScoped<IFacebookAuthenticator, FacebookAuthenticator>();
 
             services.AddMvc(options =>
             {

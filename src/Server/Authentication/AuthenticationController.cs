@@ -13,10 +13,12 @@ namespace GasWeb.Server.Authentication
     public class AuthenticationController : ControllerBase
     {
         private readonly IUserService userService;
+        private readonly IFacebookAuthenticator facebookAuthenticator;
 
-        public AuthenticationController(IUserService userService)
+        public AuthenticationController(IUserService userService, IFacebookAuthenticator facebookAuthenticator)
         {
             this.userService = userService;
+            this.facebookAuthenticator = facebookAuthenticator;
         }
 
         [HttpGet("login")]
@@ -88,21 +90,9 @@ namespace GasWeb.Server.Authentication
         }
 
         [HttpGet("login-facebook")]
-        public async Task LoginExternal(string callback)
+        public Task LoginExternal(string callback)
         {
-            //var claims = new[]
-            //{
-            //    new Claim(ClaimTypes.NameIdentifier, "test"),
-            //    new Claim(ClaimTypes.Name, "Łukasz Szafirski")
-            //};
-
-            //var identity = new ClaimsIdentity(claims, "TempCookie");
-            //var principal = new ClaimsPrincipal(identity);
-
-            //await HttpContext.SignInAsync("TempCookie", principal);
-
-            //return Redirect(callback);
-            await HttpContext.ChallengeAsync("Facebook", new AuthenticationProperties { RedirectUri = callback });
+            return facebookAuthenticator.Authenticate(HttpContext, callback);
         }
 
         private async Task SignIn(User user)
