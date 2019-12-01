@@ -35,12 +35,13 @@ namespace GasWeb.Domain.GasStations.Auchan
         {
             var gasStations = await gasStationsFetcher.GetAuchanGasStations();
             var gasStationsQueryValues = string.Join(",", gasStations.Select((x, n) => $"({n}, '{x.Name}')"));
+            var franchiseId = franchiseCollection.Auchan;
 
             var missingGasStations = await dbContext.Database.GetDbConnection().QueryAsync<int>($@"
                 SELECT n FROM (VALUES { gasStationsQueryValues }) as request (n, name)
                 LEFT JOIN ""{ nameof(GasStation) }s"" stations
                 ON stations.""{ nameof(GasStation.Name) }"" = request.name 
-                    AND stations.""{ nameof(GasStation.FranchiseId) }"" = { franchiseCollection.Auchan }
+                    AND stations.""{ nameof(GasStation.FranchiseId) }"" = { franchiseId }
                 WHERE stations.""{ nameof(GasStation.Id) }"" IS NULL");
 
             foreach (var index in missingGasStations)
@@ -50,7 +51,7 @@ namespace GasWeb.Domain.GasStations.Auchan
                     name: missingGasStation.Name,
                     addressLine1: missingGasStation.AddressLine1,
                     addressLine2: missingGasStation.AddressLine2,
-                    franchiseId: franchiseCollection.Lotos,
+                    franchiseId: franchiseId,
                     maintainedBySystem: true,
                     websiteAddress: null);
 

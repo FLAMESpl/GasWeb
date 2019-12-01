@@ -35,12 +35,13 @@ namespace GasWeb.Domain.GasStations.Lotos
         {
             var gasStations = await gasStationsFetcher.GetLotosGasStations();
             var gasStationsQueryValues = string.Join(",", gasStations.Select((x, n) => $"({n}, '{x.Name}')"));
+            var franchiseId = franchiseCollection.Lotos;
 
             var missingGasStations = await dbContext.Database.GetDbConnection().QueryAsync<int>($@"
                 SELECT n FROM (VALUES { gasStationsQueryValues }) as request (n, name)
                 LEFT JOIN ""{ nameof(GasStation) }s"" stations
                 ON stations.""{ nameof(GasStation.Name) }"" = request.name 
-                    AND stations.""{ nameof(GasStation.FranchiseId) }"" = { franchiseCollection.Lotos }
+                    AND stations.""{ nameof(GasStation.FranchiseId) }"" = { franchiseId }
                 WHERE stations.""{ nameof(GasStation.Id) }"" IS NULL");
 
             foreach (var index in missingGasStations)
@@ -50,7 +51,7 @@ namespace GasWeb.Domain.GasStations.Lotos
                     name: missingGasStation.Name,
                     addressLine1: missingGasStation.AddressLine1,
                     addressLine2: missingGasStation.AddressLine2,
-                    franchiseId: franchiseCollection.Lotos,
+                    franchiseId: franchiseId,
                     maintainedBySystem: true,
                     websiteAddress: null);
 

@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using GasWeb.Domain.Franchises.Entities;
+﻿using GasWeb.Domain.Franchises.Entities;
 using GasWeb.Domain.PriceSubmissions.Entities;
 using GasWeb.Shared.GasStations;
+using System.Collections.Generic;
 
 namespace GasWeb.Domain.GasStations.Entities
 {
     internal class GasStation : AuditEntity
     {
+        private GasStation() { }
+
         public GasStation(
             string name, 
             string addressLine1, 
