@@ -14,7 +14,8 @@ namespace GasWeb.Domain.Initialization
         {
             "Lotos",
             "Orlen",
-            "Bp"
+            "Bp",
+            "Auchan"
         };
 
         private readonly GasWebDbContext dbContext;
@@ -59,6 +60,7 @@ namespace GasWeb.Domain.Initialization
             franchiseCollectionFactory.Lotos = franchises["Lotos"];
             franchiseCollectionFactory.Orlen = franchises["Orlen"];
             franchiseCollectionFactory.Bp = franchises["Bp"];
+            franchiseCollectionFactory.Auchan = franchises["Auchan"];
             franchiseCollectionFactory.Initialized = true;
         }
     }

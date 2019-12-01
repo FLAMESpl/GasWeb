@@ -33,6 +33,7 @@ namespace GasWeb.Domain.Users.Entities
         {
             Name = updateModel.Username ?? Name;
             Role = updateModel.Role ?? Role;
+            Active = updateModel.Active ?? Active;
         }
     }
 }

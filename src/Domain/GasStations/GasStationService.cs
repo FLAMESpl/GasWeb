@@ -31,7 +31,8 @@ namespace GasWeb.Domain.GasStations
                 addressLine1: model.AddressLine1, 
                 addressLine2: model.AddressLine2,
                 franchiseId: model.FranchiseId,
-                maintainedBySystem: false);
+                maintainedBySystem: false,
+                websiteAddress: model.WebsiteAddress);
 
             auditMetadataProvider.AddAuditMetadataToNewEntity(gasStation);
             dbContext.GasStations.Add(gasStation);

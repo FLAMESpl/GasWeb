@@ -5,22 +5,22 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GasWeb.Domain.GasStations.Lotos
+namespace GasWeb.Domain.GasStations.Auchan
 {
-    public interface ILotosGasStationsUpdater
+    public interface IAuchanGasStationsUpdater
     {
         Task UpdateGasStations();
     }
 
-    internal class LotosGasStationsUpdater : ILotosGasStationsUpdater
+    internal class AuchanGasStationsUpdater : IAuchanGasStationsUpdater
     {
-        private readonly LotosGasStationsFetcher gasStationsFetcher;
+        private readonly AuchanGasStationsFetcher gasStationsFetcher;
         private readonly SystemFranchiseCollection franchiseCollection;
         private readonly GasWebDbContext dbContext;
         private readonly IAuditMetadataProvider auditMetadataProvider;
 
-        public LotosGasStationsUpdater(
-            LotosGasStationsFetcher gasStationsFetcher,
+        public AuchanGasStationsUpdater(
+            AuchanGasStationsFetcher gasStationsFetcher,
             SystemFranchiseCollection franchiseCollection,
             GasWebDbContext dbContext,
             IAuditMetadataProvider auditMetadataProvider)
@@ -33,14 +33,14 @@ namespace GasWeb.Domain.GasStations.Lotos
 
         public async Task UpdateGasStations()
         {
-            var gasStations = await gasStationsFetcher.GetLotosGasStations();
+            var gasStations = await gasStationsFetcher.GetAuchanGasStations();
             var gasStationsQueryValues = string.Join(",", gasStations.Select((x, n) => $"({n}, '{x.Name}')"));
 
             var missingGasStations = await dbContext.Database.GetDbConnection().QueryAsync<int>($@"
                 SELECT n FROM (VALUES { gasStationsQueryValues }) as request (n, name)
                 LEFT JOIN ""{ nameof(GasStation) }s"" stations
                 ON stations.""{ nameof(GasStation.Name) }"" = request.name 
-                    AND stations.""{ nameof(GasStation.FranchiseId) }"" = { franchiseCollection.Lotos }
+                    AND stations.""{ nameof(GasStation.FranchiseId) }"" = { franchiseCollection.Auchan }
                 WHERE stations.""{ nameof(GasStation.Id) }"" IS NULL");
 
             foreach (var index in missingGasStations)

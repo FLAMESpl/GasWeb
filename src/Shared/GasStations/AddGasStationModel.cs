@@ -12,5 +12,7 @@ namespace GasWeb.Shared.GasStations
         public string AddressLine2 { get; set; }
 
         public long? FranchiseId { get; set; }
+
+        public string WebsiteAddress { get; set; }
     }
 }
