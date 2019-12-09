@@ -3,6 +3,7 @@ using GasWeb.Domain.Franchises.Lotos;
 using GasWeb.Domain.Franchises.Orlen;
 using GasWeb.Domain.GasStations.Auchan;
 using GasWeb.Domain.GasStations.Lotos;
+using GasWeb.Domain.PriceSubmissions.Auchan;
 using System;
 using System.Threading.Tasks;
 
@@ -15,19 +16,22 @@ namespace GasWeb.Domain.Schedulers
         private readonly IBpWholesalePriceUpdater bpWholesalePriceUpdater;
         private readonly ILotosGasStationsUpdater lotosGasStationsUpdater;
         private readonly IAuchanGasStationsUpdater auchanGasStationsUpdater;
+        private readonly IAuchanGasStationsPricesUpdater auchanGasStationsPricesUpdater;
 
         public SchedulerTaskDispatcher(
             ILotosWholesalePriceUpdater lotosWholesalePriceUpdater,
             IOrlenWholesalePriceUpdater orlenWholesalePriceUpdater,
             IBpWholesalePriceUpdater bpWholesalePriceUpdater,
             ILotosGasStationsUpdater lotosGasStationsUpdater,
-            IAuchanGasStationsUpdater auchanGasStationsUpdater)
+            IAuchanGasStationsUpdater auchanGasStationsUpdater,
+            IAuchanGasStationsPricesUpdater auchanGasStationsPricesUpdater)
         {
             this.lotosWholesalePriceUpdater = lotosWholesalePriceUpdater;
             this.orlenWholesalePriceUpdater = orlenWholesalePriceUpdater;
             this.bpWholesalePriceUpdater = bpWholesalePriceUpdater;
             this.lotosGasStationsUpdater = lotosGasStationsUpdater;
             this.auchanGasStationsUpdater = auchanGasStationsUpdater;
+            this.auchanGasStationsPricesUpdater = auchanGasStationsPricesUpdater;
         }
 
         public Task ExecuteTask(long id)
@@ -39,6 +43,7 @@ namespace GasWeb.Domain.Schedulers
                 SchedulersCollection.RefreshPricesBp => bpWholesalePriceUpdater.UpdateWholesalePrices(),
                 SchedulersCollection.RefreshGasStationsLotos => lotosGasStationsUpdater.UpdateGasStations(),
                 SchedulersCollection.RefreshGasStationsAuchan => auchanGasStationsUpdater.UpdateGasStations(),
+                SchedulersCollection.RefreshPricesAuchan => auchanGasStationsPricesUpdater.UpdatePrices(),
                 _ => throw new ArgumentException($"Unknown task: {id}", nameof(id))
             };
         }

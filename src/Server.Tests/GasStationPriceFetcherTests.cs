@@ -18,7 +18,7 @@ namespace GasWeb.Server.Tests
             var fetcher = new AuchanGasStationsPricesFetcher(httpClient);
             var station = new GasStation(default, default, default, default, default, "Auchan-Gliwice");
             var prices = await fetcher.GetAuchanPrices(new[] { station });
-            prices.SelectMany(x => x.Value).Select(x => x.FuelType).Should().BeEquivalentTo(new[]
+            prices.Select(x => x.FuelType).Should().BeEquivalentTo(new[]
             {
                 FuelType.Diesel,
                 FuelType.Gas,

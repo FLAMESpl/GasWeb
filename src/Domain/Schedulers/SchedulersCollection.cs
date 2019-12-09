@@ -7,5 +7,6 @@
         public const long RefreshPricesBp = 2;
         public const long RefreshGasStationsLotos = 3;
         public const long RefreshGasStationsAuchan = 4;
+        public const long RefreshPricesAuchan = 5;
     }
 }

@@ -3,6 +3,7 @@
     public enum SchedulerType
     {
         RefreshWholesalePrices = 1,
-        RefreshGasStations = 2
+        RefreshGasStations = 2,
+        RefreshGasStationPrices = 3
     }
 }

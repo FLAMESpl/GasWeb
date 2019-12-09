@@ -9,6 +9,7 @@ using GasWeb.Domain.GasStations.Auchan;
 using GasWeb.Domain.GasStations.Lotos;
 using GasWeb.Domain.Initialization;
 using GasWeb.Domain.PriceSubmissions;
+using GasWeb.Domain.PriceSubmissions.Auchan;
 using GasWeb.Domain.Schedulers;
 using GasWeb.Domain.Users;
 using Microsoft.Extensions.DependencyInjection;
@@ -68,6 +69,8 @@ namespace GasWeb.Domain
         {
             services.AddScoped<IAuchanGasStationsUpdater, AuchanGasStationsUpdater>();
             services.AddScoped<AuchanGasStationsFetcher>();
+            services.AddScoped<IAuchanGasStationsPricesUpdater, AuchanGasStationsPricesUpdater>();
+            services.AddScoped<AuchanGasStationsPricesFetcher>();
         }
     }
 }

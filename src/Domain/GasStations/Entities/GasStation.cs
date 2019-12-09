@@ -30,7 +30,7 @@ namespace GasWeb.Domain.GasStations.Entities
         public string AddressLine2 { get; private set; }
         public long? FranchiseId { get; private set; }
         public bool MaintainedBySystem { get; private set; }
-        public string WebsiteAddress { get; }
+        public string WebsiteAddress { get; private set; }
         public Franchise Franchise { get; private set; }
         public ICollection<PriceSubmission> SubmitedPrices { get; private set; }
 

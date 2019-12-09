@@ -17,7 +17,7 @@
                     <th>Id</th>
                     <th>Nazwa</th>
                     <th>Rola</th>
-                    <th>Aktywny</th>
+                    <th style="text-align: center">Aktywny</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,8 +26,48 @@
                     <tr>
                         <td>@user.Id</td>
                         <td>@user.Name</td>
-                        <td>@user.Role</td>
-                        <td>@user.Active</td>
+                        <td>
+                            @if (user.Role != UserRole.System)
+                            {
+                                <AuthorizeView Roles="Admin">
+                                    <Authorized>
+                                        <EditForm Model="model" Context="editContext">
+                                            <InputSelect class="form-control" @bind-Value="user.Role" @oninput="args => HandleRoleChange(user, args)">
+                                                <option value="@UserRole.Admin">@UserRole.Admin</option>
+                                                <option value="@UserRole.Moderator">@UserRole.Moderator</option>
+                                                <option value="@UserRole.User">@UserRole.User</option>
+                                            </InputSelect>
+                                        </EditForm>
+                                    </Authorized>
+                                    <NotAuthorized>
+                                        @user.Role
+                                    </NotAuthorized>
+                                </AuthorizeView>
+                            }
+                            else
+                            {
+                                @user.Role
+                            }
+                        </td>
+                        <td>
+                            @if (user.Role != UserRole.System)
+                            {
+                                <AuthorizeView Roles="Admin">
+                                    <Authorized>
+                                        <EditForm Model="model" Context="editContext">
+                                            <InputCheckbox class="form-control" @bind-Value="user.Active" @oninput="args => HandleActiveChange(user, args)"/>
+                                        </EditForm>
+                                    </Authorized>
+                                    <NotAuthorized>
+                                        @user.Active
+                                    </NotAuthorized>
+                                </AuthorizeView>
+                            }
+                            else
+                            {
+                                <input class="form-control" type="checkbox" disabled checked/>
+                            }
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -38,6 +78,7 @@
 @code {
     IReadOnlyCollection<User> users;
     IReadOnlyCollection<string> errors;
+    UserUpdateModel model = new UserUpdateModel();
 
     protected override async Task OnInitializedAsync()
     {
@@ -47,6 +88,46 @@
         if (usersResponse.Successful)
         {
             users = usersResponse.Result;
+        }
+    }
+
+    private async Task HandleRoleChange(User user, ChangeEventArgs eventArgs)
+    {
+        var newRole = Enum.Parse<UserRole>(eventArgs.Value.ToString());
+        var response = await Client.Users.Update(user.Id, new UserUpdateModel
+        {
+            Active = user.Active,
+            Role = newRole,
+            Username = user.Name
+        });
+
+        if (response.Successful)
+        {
+            user.Role = newRole;
+        }
+        else
+        {
+            errors = response.Errors;
+        }
+    }
+
+    private async Task HandleActiveChange(User user, ChangeEventArgs eventArgs)
+    {
+        var newActive = bool.Parse(eventArgs.Value.ToString());
+        var response = await Client.Users.Update(user.Id, new UserUpdateModel
+        {
+            Active = newActive,
+            Role = user.Role,
+            Username = user.Name
+        });
+
+        if (response.Successful)
+        {
+            user.Active = newActive;
+        }
+        else
+        {
+            errors = response.Errors;
         }
     }
 }

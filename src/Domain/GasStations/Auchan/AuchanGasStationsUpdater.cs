@@ -53,7 +53,7 @@ namespace GasWeb.Domain.GasStations.Auchan
                     addressLine2: missingGasStation.AddressLine2,
                     franchiseId: franchiseId,
                     maintainedBySystem: true,
-                    websiteAddress: null);
+                    websiteAddress: missingGasStation.WebsiteAddress);
 
                 auditMetadataProvider.AddAuditMetadataToNewEntity(gasStation);
                 dbContext.Add(gasStation);

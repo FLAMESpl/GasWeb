@@ -22,7 +22,8 @@ namespace GasWeb.Domain.Initialization
             SchedulersCollection.RefreshPricesOrlen,
             SchedulersCollection.RefreshPricesBp,
             SchedulersCollection.RefreshGasStationsLotos,
-            SchedulersCollection.RefreshGasStationsAuchan
+            SchedulersCollection.RefreshGasStationsAuchan,
+            SchedulersCollection.RefreshPricesAuchan
         };
 
         public SchedulerSeeder(
@@ -56,6 +57,7 @@ namespace GasWeb.Domain.Initialization
                         2 => CreateForWholesalePrices(schedulerId, franchiseCollection.Bp),
                         3 => CreateForGasStations(schedulerId, franchiseCollection.Lotos),
                         4 => CreateForGasStations(schedulerId, franchiseCollection.Auchan),
+                        5 => CreateForGasStationPrices(schedulerId, franchiseCollection.Auchan),
                         _ => null
                     };
 
@@ -82,6 +84,15 @@ namespace GasWeb.Domain.Initialization
                 type: Shared.Schedulers.SchedulerType.RefreshGasStations,
                 franchiseId: franchiseId,
                 interval: TimeSpan.FromSeconds(30),
+                startedAt: null,
+                lastRun: null);
+
+        private Scheduler CreateForGasStationPrices(long id, long franchiseId) =>
+            new Scheduler(
+                id: id,
+                type: Shared.Schedulers.SchedulerType.RefreshWholesalePrices,
+                franchiseId: franchiseId,
+                interval: TimeSpan.FromDays(1),
                 startedAt: null,
                 lastRun: null);
     }

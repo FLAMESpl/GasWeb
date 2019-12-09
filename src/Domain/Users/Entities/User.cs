@@ -31,9 +31,9 @@ namespace GasWeb.Domain.Users.Entities
 
         public void Update(UserUpdateModel updateModel)
         {
-            Name = updateModel.Username ?? Name;
-            Role = updateModel.Role ?? Role;
-            Active = updateModel.Active ?? Active;
+            Name = updateModel.Username;
+            Role = updateModel.Role;
+            Active = updateModel.Active;
         }
     }
 }

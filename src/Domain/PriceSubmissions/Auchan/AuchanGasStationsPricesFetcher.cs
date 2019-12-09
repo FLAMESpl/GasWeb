@@ -25,15 +25,15 @@ namespace GasWeb.Domain.PriceSubmissions.Auchan
             this.httpClient = httpClient;
         }
 
-        public async Task<IReadOnlyDictionary<long, IReadOnlyCollection<SubmitPriceModel>>> GetAuchanPrices(
+        public async Task<IReadOnlyCollection<SubmitPriceModel>> GetAuchanPrices(
             IReadOnlyCollection<GasStation> gasStations)
         {
-            var result = new Dictionary<long, IReadOnlyCollection<SubmitPriceModel>>();
+            var result = new List<SubmitPriceModel>();
 
             foreach (var gasStation in gasStations)
             {
                 var prices = await GetPrices(gasStation);
-                result.Add(gasStation.Id, prices);
+                result.AddRange(prices);
             }
 
             return result;

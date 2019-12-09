@@ -32,7 +32,7 @@ namespace GasWeb.Server.Users
                 return Ok(user);
         }
 
-        [HttpPatch("{id:long}")]
+        [HttpPut("{id:long}")]
         [RequireModeratorRole]
         public async Task<IActionResult> Update(long id, [FromBody] UserUpdateModel updateModel)
         {
