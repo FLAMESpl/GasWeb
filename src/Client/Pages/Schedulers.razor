@@ -1,6 +1,7 @@
 ﻿@page "/schedulers"
 @using GasWeb.Shared.Schedulers
-@using System.Threading;
+@using System.Threading
+@using ViewModels
 @implements IDisposable
 @inject GasWebClient Client
 @inject NavigationManager NavigationManager
@@ -10,12 +11,14 @@
 <ErrorDisplay Errors="errors">
     @if (initialized)
     {
+        <ErrorDisplay Errors="parseErrors" />
         <table class="table">
             <thead>
                 <tr>
                     <th>Zadanie</th>
                     <th>Ostatnia modyfikacja</th>
-                    <th>Uruchomiony</th>
+                    <th style="text-align: center">Uruchomiony</th>
+                    <th>Częstotliwość uruchomień</th>
                     <th>Następne uruchomienie</th>
                     <th></th>
                 </tr>
@@ -24,14 +27,22 @@
                 @foreach (var scheduler in schedulers)
                 {
                     <tr>
-                        <td>@GetSchedulerDescription(scheduler)</td>
-                        <td>@scheduler.LastModifiedAt (@userNames[scheduler.LastModifiedByUserId])</td>
-                        <td>@(scheduler.StartedAt != null)</td>
-                        <td>@schedulerNextTrigger[scheduler.Id]</td>
+                        <td>@GetSchedulerDescription(scheduler.Model)</td>
+                        <td>@scheduler.Model.LastModifiedAt (@userNames[scheduler.Model.LastModifiedByUserId])</td>
+                        <td>
+                            <EditForm Model=model>
+                                <InputCheckbox class="form-control" @bind-Value="scheduler.Started" @oninput="() => HandleStartStop(scheduler)"/>
+                            </EditForm>
+                        </td>
+                        <td>
+                            <EditForm Model="model">
+                                <InputText class="form-control" @bind-Value="scheduler.Interval" @oninput="args => HandleIntervalChange(scheduler, args)" />
+                            </EditForm>
+                        </td>
+                        <td>@schedulerNextTrigger[scheduler.Model.Id]</td>
                         <td>
                             <div>
-                                <button type="submit" class="btn btn-primary" @onclick="() => HandleStartStop(scheduler)">@(scheduler.StartedAt == null ? "Start" : "Stop")</button>
-                                <button type="submit" class="btn btn-primary" @onclick="() => HandleTrigger(scheduler.Id)">Uruchom ręcznie</button>
+                                <button type="submit" class="btn btn-primary" @onclick="() => HandleTrigger(scheduler.Model.Id)">Uruchom ręcznie</button>
                             </div>
                         </td>
                     </tr>
@@ -46,13 +57,15 @@
 </ErrorDisplay>
 
 @code {
-    IReadOnlyCollection<Scheduler> schedulers;
+    IReadOnlyCollection<SchedulerViewModel> schedulers;
     Dictionary<long, DateTime?> schedulerNextTrigger;
     Dictionary<long, string> userNames;
     Dictionary<long, string> franchiseNames;
     bool initialized = false;
     IReadOnlyCollection<string> errors = Array.Empty<string>();
+    IReadOnlyCollection<string> parseErrors = Array.Empty<string>();
     Timer timer;
+    UpdateSchedulerModel model = new UpdateSchedulerModel();
 
     protected override async Task OnInitializedAsync()
     {
@@ -71,10 +84,10 @@
 
         if (aggregated.Successful)
         {
-            schedulers = schedulersResponse.Result;
+            schedulers = schedulersResponse.Result.Select(x => new SchedulerViewModel(x)).ToList();
             userNames = usersResponse.Result.ToDictionary(x => x.Id, x => x.Name);
             franchiseNames = franchiseResponse.Result.ToDictionary(x => x.Id, x => x.Name);
-            schedulerNextTrigger = schedulers.ToDictionary(x => x.Id, CalculateNextTrigger);
+            schedulerNextTrigger = schedulers.ToDictionary(x => x.Model.Id, CalculateNextTrigger);
 
             SchedulePageRefresh();
         }
@@ -82,30 +95,63 @@
         initialized = true;
     }
 
-    private DateTime? CalculateNextTrigger(Scheduler scheduler)
+    private DateTime? CalculateNextTrigger(SchedulerViewModel scheduler)
     {
-        if (scheduler.StartedAt == null) return null;
+        if (scheduler.Model.StartedAt == null) return null;
 
-        var durationFromStart = DateTime.UtcNow - scheduler.StartedAt.Value;
-        var triggerCount = durationFromStart.Ticks / scheduler.Interval.Ticks;
-        var nextTrigger = scheduler.StartedAt.Value + TimeSpan.FromTicks((triggerCount + 1) * scheduler.Interval.Ticks);
+        var durationFromStart = DateTime.UtcNow - scheduler.Model.StartedAt.Value;
+        var triggerCount = durationFromStart.Ticks / scheduler.Model.Interval.Ticks;
+        var nextTrigger = scheduler.Model.StartedAt.Value + TimeSpan.FromTicks((triggerCount + 1) * scheduler.Model.Interval.Ticks);
         return nextTrigger;
     }
 
-    private async Task HandleStartStop(Scheduler scheduler)
+    private async Task HandleStartStop(SchedulerViewModel scheduler)
     {
         var updateModel = new UpdateSchedulerModel
         {
-            Interval = scheduler.Interval,
-            Running = scheduler.StartedAt == null
+            Interval = scheduler.Model.Interval,
+            Running = !scheduler.Started
         };
 
-        await Client.Schedulers.Update(scheduler.Id, updateModel);
-        var updated = await Client.Schedulers.Get(scheduler.Id);
-        scheduler.StartedAt = updated.Result.StartedAt;
-        schedulerNextTrigger[scheduler.Id] = CalculateNextTrigger(scheduler);
+        await Client.Schedulers.Update(scheduler.Model.Id, updateModel);
+        var updated = await Client.Schedulers.Get(scheduler.Model.Id);
+        scheduler.Model.StartedAt = updated.Result.StartedAt;
+        schedulerNextTrigger[scheduler.Model.Id] = CalculateNextTrigger(scheduler);
 
         SchedulePageRefresh();
+    }
+
+    private async Task HandleIntervalChange(SchedulerViewModel scheduler, ChangeEventArgs args)
+    {
+        if (TimeSpan.TryParse(args.Value.ToString(), out var newTimeSpan))
+        {
+            if (newTimeSpan == scheduler.Model.Interval)
+            {
+                parseErrors = Array.Empty<string>();
+                return;
+            }
+
+            var updateModel = new UpdateSchedulerModel
+            {
+                Interval = newTimeSpan,
+                Running = scheduler.Started
+            };
+
+            var response = await Client.Schedulers.Update(scheduler.Model.Id, updateModel);
+            if (response.Successful)
+            {
+                scheduler.Model.Interval = newTimeSpan;
+                parseErrors = Array.Empty<string>();
+            }
+            else
+            {
+                parseErrors = response.Errors;
+            }
+        }
+        else
+        {
+            parseErrors = new[] { "Zły format czasu" };
+        }
     }
 
     private Task HandleTrigger(long id)
@@ -132,7 +178,7 @@
         {
             timer = new Timer(_ =>
             {
-                schedulerNextTrigger = schedulers.ToDictionary(x => x.Id, CalculateNextTrigger);
+                schedulerNextTrigger = schedulers.ToDictionary(x => x.Model.Id, CalculateNextTrigger);
                 StateHasChanged();
                 var dueTime = GetTimerDueTime();
                 timer.Change(dueTime, dueTime);
