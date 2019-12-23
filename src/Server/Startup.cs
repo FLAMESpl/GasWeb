@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -38,6 +39,8 @@ namespace GasWeb.Server
             var postgreSqlSettings = Configuration.GetSection(nameof(PostgreSqlSettings)).Get<PostgreSqlSettings>();
             var bootstrap = new GasWebBootstrap();
             bootstrap.Configure(services);
+
+            services.AddSingleton(postgreSqlSettings);
             services.AddScoped<HttpClientProvider>();
             services.AddHttpClient<HttpClientProvider>();
             services.AddScoped(sp => sp.GetRequiredService<HttpClientProvider>().Get());

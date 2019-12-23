@@ -75,7 +75,7 @@ namespace GasWeb.Domain.Initialization
                 type: Shared.Schedulers.SchedulerType.RefreshWholesalePrices,
                 franchiseId: franchiseId,
                 interval: TimeSpan.FromSeconds(15),
-                startedAt: DateTime.UtcNow,
+                startedAt: null,
                 lastRun: null);
 
         private Scheduler CreateForGasStations(long id, long franchiseId) =>
