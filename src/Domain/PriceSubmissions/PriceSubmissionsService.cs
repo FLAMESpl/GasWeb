@@ -71,7 +71,7 @@ namespace GasWeb.Domain.PriceSubmissions
 
         public async Task<PriceSubmission> Get(long id)
         {
-            var submission = await dbContext.PriceSubmissions.GetAsync(id);
+            var submission = await dbContext.PriceSubmissions.Include(x => x.Ratings).GetAsync(x => x.Id == id);
             return submission.ToContract();
         }
 

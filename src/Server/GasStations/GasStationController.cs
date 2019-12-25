@@ -44,7 +44,7 @@ namespace GasWeb.Server.GasStations
             return NoContent();
         }
 
-        [HttpPatch("{id:long}")]
+        [HttpPut("{id:long}")]
         [RequireUserRole]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateGasStationModel model)
         {

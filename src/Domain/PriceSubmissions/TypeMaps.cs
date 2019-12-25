@@ -1,4 +1,5 @@
 ﻿using GasWeb.Shared.PriceSubmissions;
+using System;
 using System.Linq;
 
 namespace GasWeb.Domain.PriceSubmissions
@@ -13,7 +14,7 @@ namespace GasWeb.Domain.PriceSubmissions
                 gasStationId: domain.GasStationId,
                 amount: domain.Amount,
                 fuelType: domain.FuelType,
-                ratings: domain.Ratings.Select(x => x.ToContract()).ToList());
+                ratings: domain.Ratings?.Select(x => x.ToContract()).ToArray() ?? Array.Empty<PriceSubmissionRating>());
 
         public static PriceSubmissionRating ToContract(this Entities.PriceSubmissionRating domain)
             => new PriceSubmissionRating

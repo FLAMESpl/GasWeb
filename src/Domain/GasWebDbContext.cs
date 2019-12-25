@@ -39,7 +39,7 @@ namespace GasWeb.Domain
 
             modelBuilder.AuditEntity<PriceSubmission>(b =>
             {
-                //b.HasIndex(x => new { x.GasStationId, x.CreatedByUserId, x.SubmissionDate, x.FuelType }).IsUnique();
+                b.HasIndex(x => new { x.GasStationId, x.CreatedByUserId, x.SubmissionDate, x.FuelType }).IsUnique();
                 b.Property(x => x.SubmissionDate).HasColumnType("date");
                 b.HasMany(x => x.Ratings).WithOne().HasForeignKey(x => x.PriceSubmissionId).OnDelete(DeleteBehavior.Cascade);
             });

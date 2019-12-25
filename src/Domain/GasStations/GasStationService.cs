@@ -43,7 +43,7 @@ namespace GasWeb.Domain.GasStations
         public async Task Delete(long id)
         {
             var gasStation = await dbContext.GasStations.GetAsync(id);
-            dbContext.GasStations.Add(gasStation);
+            dbContext.GasStations.Remove(gasStation);
             await dbContext.SaveChangesAsync();
         }
 

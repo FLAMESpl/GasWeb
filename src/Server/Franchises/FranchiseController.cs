@@ -36,7 +36,7 @@ namespace GasWeb.Server.Franchises
             return CreatedAtAction(nameof(Get), new { id });
         }
 
-        [HttpPost("{id:long}")]
+        [HttpPut("{id:long}")]
         [RequireModeratorRole]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateFranchiseModel model)
         {
