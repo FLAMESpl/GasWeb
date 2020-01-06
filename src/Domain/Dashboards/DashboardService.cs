@@ -54,14 +54,14 @@ namespace GasWeb.Domain.Dashboards
                 return priceSubmissions
                     .Where(x => x.TotalScore >= 0)
                     .GroupBy(x => x.FuelType)
-                    .Select(x =>
+                    .Select(fuelPrices =>
                     {
-                        var prices = priceSubmissions.Where(x => now - x.SubmissionDate <= query.PastSubmittedPricesAggregationWindow).ToList();
+                        var prices = fuelPrices.Where(x => now - x.SubmissionDate <= query.PastSubmittedPricesAggregationWindow).ToList();
                         var amount = prices.Any() ? 
                             aggregation(prices.Select(x => x.Amount)) :
                             priceSubmissions.OrderByDescending(x => x.SubmissionDate).First().Amount;
 
-                        return new FuelPrice(x.Key, amount);
+                        return new FuelPrice(fuelPrices.Key, amount);
                     })
                     .ToList();
             }

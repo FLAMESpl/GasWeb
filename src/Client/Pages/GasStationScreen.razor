@@ -1,5 +1,6 @@
 ﻿@page "/gas-stations/{GasStationId:long}"
 @using GasWeb.Shared
+@using GasWeb.Shared.Users
 @using GasWeb.Shared.Comments
 @using GasWeb.Shared.GasStations
 @using GasWeb.Shared.Franchises
@@ -86,7 +87,7 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Id</th>
+                    <th />
                     <th>Rodzaj paliwa</th>
                     <th>Cena</th>
                     <th>Utworzono przez</th>
@@ -119,7 +120,14 @@
                     @foreach (var priceSubmission in priceSubmissions)
                     {
                         <tr>
-                            <td>@priceSubmission.Id</td>
+                            <td>
+                                @if (CanBeDeleted(priceSubmission))
+                                {
+                                    <button class="btn btn-secondary" @onclick="() => HandleDeletingPriceSubmission(priceSubmission.Id)">
+                                        Usuń
+                                    </button>
+                                }
+                            </td>
                             <td>@priceSubmission.FuelType.ToDisplayName()</td>
                             <td>@priceSubmission.Amount.ToDisplayAmount()</td>
                             <td>@userNames[priceSubmission.CreatedByUserId]</td>
@@ -174,6 +182,8 @@
 @code {
     [Parameter] public long GasStationId { get; set; }
 
+    [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; }
+
     GasStation gasStation;
     Franchise franchise;
     IReadOnlyCollection<PriceSubmission> priceSubmissions;
@@ -183,9 +193,13 @@
     bool refreshing = false;
     SubmitPriceModel submitPriceModel;
     FuelType fuelTypes = FuelType.All;
+    AuthenticationState authState;
+    long systemUser;
 
     protected override async Task OnInitializedAsync()
     {
+        authState = await AuthStateProvider.GetAuthenticationStateAsync();
+
         var gasStationTask = Client.GasStations.Get(GasStationId);
         var priceSubmissionsTask = Client.PriceSubmissions.GetAllPages(new { GasStationId });
         var usersTask = Client.Users.GetList();
@@ -199,6 +213,7 @@
         gasStation = gasStationResponse.Result;
         priceSubmissions = priceSubmissionsResponse.Result;
         userNames = usersResponse.Result.ToDictionary(x => x.Id, x => x.Name);
+        systemUser = usersResponse.Result.Single(x => x.Role == UserRole.System).Id;
 
         var aggregated = AggregatedServerResult.From(gasStationResponse, priceSubmissionsResponse, usersResponse);
         errors = aggregated.Errors;
@@ -263,4 +278,20 @@
             PriceSubmissionRatingValue.Positive => 1
         })
         ?? 0;
+
+    private async Task HandleDeletingPriceSubmission(long priceSubmissionId)
+    {
+        await Client.PriceSubmissions.Delete(priceSubmissionId);
+        await Refresh();
+    }
+
+    private bool CanBeDeleted(PriceSubmission priceSubmission)
+    {
+        var userIdClaim = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+        var userId = long.Parse(userIdClaim.Value);
+        return systemUser != priceSubmission.CreatedByUserId &&
+            (userId == priceSubmission.Id ||
+            authState.User.IsInRole(UserRole.Admin.ToString()) ||
+            authState.User.IsInRole(UserRole.Moderator.ToString()));
+    }
 }
