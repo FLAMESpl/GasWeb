@@ -50,8 +50,10 @@
                     <th>Nazwa</th>
                     <th>Utworzono przez</th>
                     <th>Ostatnia modyfikacja</th>
-                    <th>Hurt. cena benzyny</th>
-                    <th>Hurt. cena diesela</th>
+                    <th>Hurt. cena Pb98</th>
+                    <th>Hurt. cena Pb95</th>
+                    <th>Hurt. cena ON</th>
+                    <th>Hurt. cena ON Premium</th>
                 </tr>
             </thead>
             <tbody>
@@ -62,8 +64,10 @@
                         <td>@franchise.Name</td>
                         <td>@userNames[franchise.CreatedByUserId]</td>
                         <td>@franchise.ModifiedAt</td>
-                        <td>@franchise.FindPrice(FuelType.Petrol)?.ToDisplayAmount()</td>
+                        <td>@franchise.FindPrice(FuelType.Pb98)?.ToDisplayAmount()</td>
+                        <td>@franchise.FindPrice(FuelType.Pb95)?.ToDisplayAmount()</td>
                         <td>@franchise.FindPrice(FuelType.Diesel)?.ToDisplayAmount()</td>
+                        <td>@franchise.FindPrice(FuelType.DieselPremium)?.ToDisplayAmount()</td>
                     </tr>
                 }
             </tbody>

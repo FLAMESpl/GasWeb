@@ -61,9 +61,11 @@
                     <div class="form-group">
                         <label for="fuelType">Rodzaj paliwa</label>
                         <InputSelect Id="fuelType" Class="form-control" @bind-Value="@submitPriceModel.FuelType">
-                            <option value="@FuelType.Petrol">Benzyna</option>
-                            <option value="@FuelType.Diesel">Diesel</option>
-                            <option value="@FuelType.Gas">Gaz</option>
+                            <option value="@FuelType.Pb95">Pb95</option>
+                            <option value="@FuelType.Pb98">Pb98</option>
+                            <option value="@FuelType.Diesel">ON</option>
+                            <option value="@FuelType.DieselPremium">ON Premium</option>
+                            <option value="@FuelType.Gas">LPG</option>
                         </InputSelect>
                         <ValidationMessage For="@(() => submitPriceModel.FuelType)" />
                     </div>
@@ -97,9 +99,11 @@
                     <th>
                         <select Id="fuelType" @onchange="HandleRefresh" Class="form-control">
                             <option value="@((int)FuelType.All)">Wszystkie</option>
-                            <option value="@((int)FuelType.Petrol)">Benzyna</option>
-                            <option value="@((int)FuelType.Diesel)">Diesel</option>
-                            <option value="@((int)FuelType.Gas)">Gaz</option>
+                            <option value="@((int)FuelType.Pb98)">Pb98</option>
+                            <option value="@((int)FuelType.Pb95)">Pb95</option>
+                            <option value="@((int)FuelType.Diesel)">ON</option>
+                            <option value="@((int)FuelType.DieselPremium)">ON Premium</option>
+                            <option value="@((int)FuelType.Gas)">LPG</option>
                         </select>
                     </th>
                     <th />
@@ -204,7 +208,7 @@
             if (gasStation.FranchiseId.HasValue)
                 franchise = (await Client.Franchises.Get(gasStation.FranchiseId.Value)).Result;
 
-        submitPriceModel = new SubmitPriceModel { GasStationId = GasStationId, FuelType = FuelType.Petrol };
+        submitPriceModel = new SubmitPriceModel { GasStationId = GasStationId, FuelType = FuelType.Pb98 };
 
         initialized = true;
     }

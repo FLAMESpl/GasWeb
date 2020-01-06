@@ -22,12 +22,14 @@ namespace GasWeb.Domain.Franchises.Bp
         {
             var htmlDocument = await httpClient.GetHtmlDocument(BpWholesalePricesWebPage);
             var tableRows = htmlDocument.DocumentNode.SelectSingleNode("html/body/div[5]/div[3]/div[1]/div[1]/div[2]/div[1]/div[1]/div[2]/table/tbody");
-            var petrol = GetPriceForFuel(tableRows, "Benzyna bezołowiowa - Pb95");
+            var petrol95 = GetPriceForFuel(tableRows, "Benzyna bezołowiowa - Pb95");
+            var petrol98 = GetPriceForFuel(tableRows, "Benzyna bezołowiowa - Pb98");
             var diesel = GetPriceForFuel(tableRows, "Olej Napędowy");
             return new[]
             {
                 new FuelTypePrice(FuelType.Diesel, diesel),
-                new FuelTypePrice(FuelType.Petrol, petrol)
+                new FuelTypePrice(FuelType.Pb95, petrol95),
+                new FuelTypePrice(FuelType.Pb98, petrol98)
             };
         }
 

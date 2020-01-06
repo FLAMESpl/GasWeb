@@ -8,9 +8,11 @@ namespace GasWeb.Client.Shared
         {
             switch (fuelType)
             {
-                case FuelType.Petrol: return "Benzyna";
-                case FuelType.Diesel: return "Diesel";
-                case FuelType.Gas: return "Gaz";
+                case FuelType.Pb95: return "Pb95";
+                case FuelType.Pb98: return "Pb98";
+                case FuelType.Diesel: return "ON";
+                case FuelType.DieselPremium: return "ON+";
+                case FuelType.Gas: return "LPG";
                 default: return fuelType.ToString();
             }
         }

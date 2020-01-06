@@ -79,7 +79,7 @@ namespace GasWeb.Domain.PriceSubmissions
         {
             var dbQuery = dbContext.PriceSubmissions.Include(x => x.Ratings).AsQueryable();
 
-            if (query.FuelTypes != (FuelType.Diesel | FuelType.Gas | FuelType.Petrol))
+            if (query.FuelTypes != FuelType.All)
                 dbQuery = dbQuery.Where(x => query.FuelTypes.HasFlag(x.FuelType));
 
             if (query.CreatedByUserId.HasValue)

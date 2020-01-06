@@ -42,7 +42,7 @@ namespace GasWeb.Server.PriceSubmissions
         public Task<PageResponse<PriceSubmission>> GetList(long? gasStationId, FuelType? fuelTypes, long? createdByUserId,
             int pageNumber = RequestDefaults.PageNumber, int pageSize = RequestDefaults.PageSize)
         {
-            var types = fuelTypes ?? FuelType.Diesel | FuelType.Gas | FuelType.Petrol;
+            var types = fuelTypes ?? FuelType.All;
             var query = new GetPriceSubmissions(gasStationId, types, createdByUserId, pageNumber, pageSize);
             return priceSubmissionsService.GetList(query);
         }

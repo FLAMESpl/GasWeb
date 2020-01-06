@@ -19,9 +19,11 @@ namespace GasWeb.Server.Tests
             var fetcher = new LotosWholesalePriceFetcher(httpClient);
             var prices = await fetcher.GetPrices();
 
-            prices.Should().HaveCount(2);
-            prices.Should().ContainSingle(x => x.FuelType == FuelType.Petrol);
+            prices.Should().HaveCount(4);
+            prices.Should().ContainSingle(x => x.FuelType == FuelType.Pb95);
+            prices.Should().ContainSingle(x => x.FuelType == FuelType.Pb98);
             prices.Should().ContainSingle(x => x.FuelType == FuelType.Diesel);
+            prices.Should().ContainSingle(x => x.FuelType == FuelType.DieselPremium);
             prices.Select(x => x.Amount).All(x => x > 2 && x < 6).Should().BeTrue();
         }
 
@@ -32,9 +34,11 @@ namespace GasWeb.Server.Tests
             var fetcher = new OrlenWholesalePriceFetcher(httpClient);
             var prices = await fetcher.GetPrices();
 
-            prices.Should().HaveCount(2);
-            prices.Should().ContainSingle(x => x.FuelType == FuelType.Petrol);
+            prices.Should().HaveCount(4);
+            prices.Should().ContainSingle(x => x.FuelType == FuelType.Pb95);
+            prices.Should().ContainSingle(x => x.FuelType == FuelType.Pb98);
             prices.Should().ContainSingle(x => x.FuelType == FuelType.Diesel);
+            prices.Should().ContainSingle(x => x.FuelType == FuelType.DieselPremium);
             prices.Select(x => x.Amount).All(x => x > 2 && x < 6).Should().BeTrue();
         }
 
@@ -45,8 +49,9 @@ namespace GasWeb.Server.Tests
             var fetcher = new BpWholesalePriceFetcher(httpClient);
             var prices = await fetcher.GetPrices();
 
-            prices.Should().HaveCount(2);
-            prices.Should().ContainSingle(x => x.FuelType == FuelType.Petrol);
+            prices.Should().HaveCount(3);
+            prices.Should().ContainSingle(x => x.FuelType == FuelType.Pb95);
+            prices.Should().ContainSingle(x => x.FuelType == FuelType.Pb98);
             prices.Should().ContainSingle(x => x.FuelType == FuelType.Diesel);
             prices.Select(x => x.Amount).All(x => x > 2 && x < 6).Should().BeTrue();
         }

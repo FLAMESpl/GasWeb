@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using GasWeb.Shared
 @using GasWeb.Shared.Dashboards.GasStations
 @using GasWeb.Shared.GasStations
 @using GasWeb.Client.Pages.ViewModels
@@ -34,9 +35,11 @@
                             <InputSelect Id="franchise" Class="form-control" @bind-Value="@addGasStationViewModel.Franchise">
                                 <option></option>
                                 @foreach (var name in franchiseNames.Values)
-                                {
+                                        {
                                     <option>@name</option>
-                                }
+                                        }
+                                /**/
+                                /**/
                             </InputSelect>
                             <ValidationMessage For="@(() => addGasStationViewModel.Franchise)" />
                         </div>
@@ -93,14 +96,18 @@
                         </td>
                         <td>
                             <div>
-                                <p>Benzyna: @vm.Item.MinimalSubmittedPrices.Petrol?.ToDisplayAmount() - @vm.Item.MaximalSubmittedPrices.Petrol?.ToDisplayAmount()</p>
-                                <p>Diesel: @vm.Item.MinimalSubmittedPrices.Diesel?.ToDisplayAmount() - @vm.Item.MaximalSubmittedPrices.Diesel?.ToDisplayAmount()</p>
+                                @foreach (var fuelType in FuelTypes)
+                                {
+                                    <p>@FormatUserSubmitted(fuelType, vm.Item)</p>
+                                }
                             </div>
                         </td>
                         <td>
                             <div>
-                                <p>Benzyna: @vm.Item.WholesalePrices.Petrol?.ToDisplayAmount()</p>
-                                <p>Diesel: @vm.Item.WholesalePrices.Diesel?.ToDisplayAmount()</p>
+                                @foreach (var fuelType in FuelTypes.Where(x => x != FuelType.Gas))
+                                {
+                                    <p>@FormatWholesale(fuelType, vm.Item)</p>
+                                }
                             </div>
                         </td>
                     </tr>
@@ -109,16 +116,16 @@
         </table>
     }
 
-<style>
-    .hoverTable {
-        width: 100%;
-        border-collapse: collapse;
-    }
-        /* Define the hover highlight color for the table row */
-        .hoverTable tbody tr:hover {
-            background-color: #00e673;
+    <style>
+        .hoverTable {
+            width: 100%;
+            border-collapse: collapse;
         }
-</style>
+            /* Define the hover highlight color for the table row */
+            .hoverTable tbody tr:hover {
+                background-color: #00e673;
+            }
+    </style>
 </ErrorDisplay>
 
 @code {
@@ -128,6 +135,8 @@
     Dictionary<long, string> franchiseNames;
     bool expandEditForm = false;
     AddGasStationViewModel addGasStationViewModel = new AddGasStationViewModel();
+
+    static FuelType[] FuelTypes = new[] { FuelType.Pb98, FuelType.Pb95, FuelType.Diesel, FuelType.DieselPremium, FuelType.Gas };
 
     protected override async Task OnInitializedAsync()
     {
@@ -171,5 +180,18 @@
         await Client.GasStations.Create(addGasStationViewModel.ToModel(franchiseNames));
         addGasStationViewModel = new AddGasStationViewModel();
         await OnInitializedAsync();
+    }
+
+    private string FormatUserSubmitted(FuelType type, GasStationsDashboardItem item)
+    {
+        var minimalSubmission = item.MinimalSubmittedPrices.SingleOrDefault(x => x.Type == type);
+        var maximalSubmission = item.MaximalSubmittedPrices.SingleOrDefault(x => x.Type == type);
+        return $"{ type.ToDisplayName() }: { minimalSubmission?.Amount.ToDisplayAmount() } - { maximalSubmission?.Amount.ToDisplayAmount() }";
+    }
+
+    private string FormatWholesale(FuelType type, GasStationsDashboardItem item)
+    {
+        var price = item.WholesalePrices.SingleOrDefault(x => x.Type == type);
+        return $"{ type.ToDisplayName() }: { price?.Amount.ToDisplayAmount() }";
     }
 }

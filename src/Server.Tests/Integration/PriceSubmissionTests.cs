@@ -34,7 +34,7 @@ namespace GasWeb.Server.Tests.Integration
             var submitPriceModel = new SubmitPriceModel
             {
                 Amount = 5,
-                FuelType = FuelType.Petrol,
+                FuelType = FuelType.Pb98,
                 GasStationId = gasStationId
             };
 
@@ -67,7 +67,7 @@ namespace GasWeb.Server.Tests.Integration
             var submitPriceModelPetrol = new SubmitPriceModel
             {
                 Amount = 5,
-                FuelType = FuelType.Petrol,
+                FuelType = FuelType.Pb98,
                 GasStationId = gasStationId
             };
 
@@ -123,7 +123,7 @@ namespace GasWeb.Server.Tests.Integration
             var submitPriceModel1 = new SubmitPriceModel
             {
                 Amount = 5,
-                FuelType = FuelType.Petrol,
+                FuelType = FuelType.Pb98,
                 GasStationId = gasStationId
             };
 
@@ -153,7 +153,7 @@ namespace GasWeb.Server.Tests.Integration
             var submitPriceModel = new SubmitPriceModel
             {
                 Amount = 5,
-                FuelType = FuelType.Petrol,
+                FuelType = FuelType.Pb98,
                 GasStationId = gasStationId
             };
 

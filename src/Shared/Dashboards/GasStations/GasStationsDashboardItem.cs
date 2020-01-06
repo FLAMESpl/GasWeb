@@ -1,4 +1,5 @@
 ﻿using GasWeb.Shared.GasStations;
+using System.Collections.Generic;
 
 namespace GasWeb.Shared.Dashboards.GasStations
 {
@@ -7,9 +8,9 @@ namespace GasWeb.Shared.Dashboards.GasStations
         public GasStationsDashboardItem(
             GasStation gasStation,
             string franchiseName,
-            FuelPrices wholesalePrices,
-            FuelPrices minimalSubmittedPrices,
-            FuelPrices maximalSubmittedPrices)
+            IReadOnlyCollection<FuelPrice> wholesalePrices,
+            IReadOnlyCollection<FuelPrice> minimalSubmittedPrices,
+            IReadOnlyCollection<FuelPrice> maximalSubmittedPrices)
         {
             GasStation = gasStation;
             FranchiseName = franchiseName;
@@ -20,8 +21,8 @@ namespace GasWeb.Shared.Dashboards.GasStations
 
         public GasStation GasStation { get; }
         public string FranchiseName { get; }
-        public FuelPrices WholesalePrices { get; }
-        public FuelPrices MinimalSubmittedPrices { get; }
-        public FuelPrices MaximalSubmittedPrices { get; }
+        public IReadOnlyCollection<FuelPrice> WholesalePrices { get; }
+        public IReadOnlyCollection<FuelPrice> MinimalSubmittedPrices { get; }
+        public IReadOnlyCollection<FuelPrice> MaximalSubmittedPrices { get; }
     }
 }

@@ -1,14 +1,14 @@
 ﻿namespace GasWeb.Shared.Dashboards.GasStations
 {
-    public class FuelPrices
+    public class FuelPrice
     {
-        public FuelPrices(decimal? petrol, decimal? diesel)
+        public FuelPrice(FuelType type, decimal amount)
         {
-            Petrol = petrol;
-            Diesel = diesel;
+            Type = type;
+            Amount = amount;
         }
 
-        public decimal? Petrol { get; }
-        public decimal? Diesel { get; }
+        public FuelType Type { get; }
+        public decimal Amount { get; }
     }
 }

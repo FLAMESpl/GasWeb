@@ -1,4 +1,5 @@
-﻿using GasWeb.Domain.GasStations;
+﻿using GasWeb.Domain.Franchises.Entities;
+using GasWeb.Domain.GasStations;
 using GasWeb.Domain.PriceSubmissions.Entities;
 using GasWeb.Shared;
 using GasWeb.Shared.Dashboards.GasStations;
@@ -40,52 +41,32 @@ namespace GasWeb.Domain.Dashboards
                     .Select(x => new GasStationsDashboardItem(
                         gasStation: x.ToContract(),
                         franchiseName: x.Franchise?.Name,
-                        wholesalePrices: new FuelPrices(
-                            petrol: x.Franchise.WholesalePrices.SingleOrDefault(x => x.FuelType == FuelType.Petrol)?.Amount,
-                            diesel: x.Franchise.WholesalePrices.SingleOrDefault(x => x.FuelType == FuelType.Diesel)?.Amount),
-                        minimalSubmittedPrices: GetAggregatedMinimalPrices(x.SubmitedPrices),
-                        maximalSubmittedPrices: GetAggregatedMaximalPrices(x.SubmitedPrices)
+                        wholesalePrices: x.Franchise.WholesalePrices.Select(ToDashboard).ToList(),
+                        minimalSubmittedPrices: GetAggregatedPricesInWindowForFuelType(x.SubmitedPrices, x => x.Min()),
+                        maximalSubmittedPrices: GetAggregatedPricesInWindowForFuelType(x.SubmitedPrices, x => x.Max())
                     ))
                     .ToList());
 
-            FuelPrices GetAggregatedMinimalPrices(ICollection<PriceSubmission> priceSubmissions)
-            {
-                return GetAggregatedPricesInWindow(priceSubmissions, x => x.Max());
-            }
-
-            FuelPrices GetAggregatedMaximalPrices(ICollection<PriceSubmission> priceSubmissions)
-            {
-                return GetAggregatedPricesInWindow(priceSubmissions, x => x.Min());
-            }
-
-            FuelPrices GetAggregatedPricesInWindow(
-                ICollection<PriceSubmission> priceSubmissions,
-                Func<IEnumerable<decimal>, decimal> aggregation)
-            {
-                return new FuelPrices(
-                    GetAggregatedPricesInWindowForFuelType(priceSubmissions.Where(x => x.FuelType == FuelType.Petrol), aggregation),
-                    GetAggregatedPricesInWindowForFuelType(priceSubmissions.Where(x => x.FuelType == FuelType.Diesel), aggregation));
-            }
-
-            decimal? GetAggregatedPricesInWindowForFuelType(
+            IReadOnlyCollection<FuelPrice> GetAggregatedPricesInWindowForFuelType(
                 IEnumerable<PriceSubmission> priceSubmissions, 
                 Func<IEnumerable<decimal>, decimal> aggregation)
             {
-                priceSubmissions = priceSubmissions.Where(x => x.TotalScore >= 0).ToList();
+                return priceSubmissions
+                    .Where(x => x.TotalScore >= 0)
+                    .GroupBy(x => x.FuelType)
+                    .Select(x =>
+                    {
+                        var prices = priceSubmissions.Where(x => now - x.SubmissionDate <= query.PastSubmittedPricesAggregationWindow).ToList();
+                        var amount = prices.Any() ? 
+                            aggregation(prices.Select(x => x.Amount)) :
+                            priceSubmissions.OrderByDescending(x => x.SubmissionDate).First().Amount;
 
-                if (!priceSubmissions.Any())
-                    return null;
-
-                var prices = priceSubmissions.Where(x => now - x.SubmissionDate <= query.PastSubmittedPricesAggregationWindow).ToList();
-                if (prices.Any())
-                {
-                    return aggregation(prices.Select(x => x.Amount));
-                }
-                else
-                {
-                    return priceSubmissions.OrderByDescending(x => x.SubmissionDate).First().Amount;
-                }
+                        return new FuelPrice(x.Key, amount);
+                    })
+                    .ToList();
             }
         }
+
+        private static FuelPrice ToDashboard(FranchiseWholesalePrice price) => new FuelPrice(price.FuelType, price.Amount);
     }
 }

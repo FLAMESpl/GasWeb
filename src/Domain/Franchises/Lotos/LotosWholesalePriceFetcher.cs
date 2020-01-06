@@ -22,13 +22,17 @@ namespace GasWeb.Domain.Franchises.Lotos
         {
             var htmlDocument = await httpClient.GetHtmlDocument(LotosWebPageUrl);
             var tableRows = htmlDocument.DocumentNode.SelectNodes("html/body/main/section[1]/div[1]/table[1]/tbody/tr");
-            var petrolPrice = GetPriceFromTable(tableRows, "Benzyna bezołowiowa 95");
+            var petrolPrice98 = GetPriceFromTable(tableRows, "Benzyna bezołowiowa 98");
+            var petrolPrice95 = GetPriceFromTable(tableRows, "Benzyna bezołowiowa 95");
             var dieselPrice = GetPriceFromTable(tableRows, "Olej napędowy EURODIESEL");
+            var dieselPricePremium = GetPriceFromTable(tableRows, "Olej napędowy I Z-40");
 
             return new[]
             {
-                new FuelTypePrice(FuelType.Petrol, petrolPrice),
-                new FuelTypePrice(FuelType.Diesel, dieselPrice)
+                new FuelTypePrice(FuelType.Pb98, petrolPrice98),
+                new FuelTypePrice(FuelType.Pb95, petrolPrice95),
+                new FuelTypePrice(FuelType.Diesel, dieselPrice),
+                new FuelTypePrice(FuelType.DieselPremium, dieselPricePremium)
             };
         }
 

@@ -6,9 +6,11 @@ namespace GasWeb.Shared
     public enum FuelType
     {
         None = 0,
-        Petrol = 1,
-        Diesel = 2,
-        Gas = 4,
-        All = Petrol | Diesel | Gas
+        Pb95 = 1,
+        Pb98 = 2,
+        Diesel = 4,
+        DieselPremium = 8,
+        Gas = 16,
+        All = Pb95 | Pb98 | Diesel | DieselPremium | Gas
     }
 }

@@ -22,8 +22,11 @@ namespace GasWeb.Server.Tests
             {
                 FuelType.Diesel,
                 FuelType.Gas,
-                FuelType.Petrol
+                FuelType.Pb95,
+                FuelType.Pb98
             });
+
+            prices.Select(x => x.Amount).All(x => x > 2 && x < 6).Should().BeTrue();
         }
     }
 }

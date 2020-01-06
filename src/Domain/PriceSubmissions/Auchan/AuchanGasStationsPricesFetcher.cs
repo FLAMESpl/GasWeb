@@ -71,7 +71,8 @@ namespace GasWeb.Domain.PriceSubmissions.Auchan
                 Amount = decimal.Parse(gasType.price, CultureInfo.InvariantCulture),
                 FuelType = gasType.name switch
                 {
-                    "Pb95 (E5)" => FuelType.Petrol,
+                    "Pb98 (E5)" => FuelType.Pb98,
+                    "Pb95 (E5)" => FuelType.Pb95,
                     "ON (B7)" => FuelType.Diesel,
                     "LPG" => FuelType.Gas,
                     _ => FuelType.None,
